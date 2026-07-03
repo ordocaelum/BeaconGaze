@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beacon Gaze — Not a prediction. A direction.</title>
+<meta name="description" content="A personalized astrology reading — your chart, your archetype, your season ahead — delivered to your inbox in minutes. For entertainment and self-reflection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   TOKENS
+   ===================================================================== */
+:root{
+  --space:#080711;
+  --nebula:#131124;
+  --glow:#6344F5;
+  --glow-soft:rgba(99,68,245,.4);
+  --heading:#9B86FF;
+  --body:#A5A1B8;
+  --white:#FFFFFF;
+  --teal:#3ED6C0;
+  --ease-out:cubic-bezier(.22,.9,.32,1);
+  --ease-spring:cubic-bezier(.34,1.4,.44,1);
+  --dur-fast:.3s;
+  --dur-slow:.9s;
+  /* z-index layers */
+  --z-stars:0; --z-content:10; --z-nav:50; --z-toast:80;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--space);color:var(--body);
+  font-family:'Inter',system-ui,sans-serif;font-size:17px;line-height:1.65;
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:'Orbitron',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--white);margin:0}
+p{margin:0}
+a{color:inherit}
+img,svg{display:block}
+::selection{background:rgba(99,68,245,.45);color:#fff}
+:focus-visible{outline:2px solid var(--heading);outline-offset:3px;border-radius:4px}
+
+/* layout helpers */
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+.narrow{max-width:720px;margin:0 auto}
+section{position:relative;z-index:var(--z-content);padding:110px 0}
+.eyebrow{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--heading)}
+.h2{font-size:clamp(1.5rem,3.4vw,2.4rem);font-weight:700;margin-top:14px;line-height:1.25}
+.lede{margin-top:18px;font-size:1.05rem;max-width:640px}
+
+/* starfield canvas */
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:var(--z-stars);pointer-events:none}
+
+/* nav */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:var(--z-nav);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(8,7,17,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(99,68,245,.18);
+  transition:background var(--dur-fast) ease;
+}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;letter-spacing:.14em;color:var(--white);text-decoration:none}
+.logo em{color:var(--heading);font-style:normal}
+.nav-cta{
+  font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;
+  background:linear-gradient(135deg,#6344F5,#8b5cf6);
+  box-shadow:0 0 15px var(--glow-soft);
+  transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) ease;
+}
+.nav-cta:hover{transform:scale(1.04);box-shadow:0 0 26px rgba(99,68,245,.6)}
+
+/* buttons */
+.btn-primary{
+  display:inline-block;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:#fff;text-decoration:none;text-align:center;cursor:pointer;border:none;
+  padding:18px 38px;font-size:.9rem;border-radius:10px;
+  background:linear-gradient(135deg,#6344F5,#8b5cf6);
+  box-shadow:0 0 20px var(--glow-soft),inset 0 1px 0 rgba(255,255,255,.18);
+  transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur-fast) ease;
+}
+.btn-primary:hover{transform:scale(1.03) translateY(-1px);box-shadow:0 0 34px rgba(99,68,245,.65),inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-primary:active{transform:scale(.99)}
+.btn-ghost{
+  display:inline-block;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--heading);text-decoration:none;cursor:pointer;text-align:center;
+  padding:16px 30px;font-size:.78rem;border-radius:10px;background:transparent;
+  border:1px solid rgba(99,68,245,.45);
+  transition:all var(--dur-fast) var(--ease-out);
+}
+.btn-ghost:hover{border-color:var(--heading);color:#fff;box-shadow:0 0 18px rgba(99,68,245,.35);transform:scale(1.02)}
+
+/* glass card */
+.glass{
+  background:rgba(19,17,36,.62);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(99,68,245,.25);border-radius:14px;
+  transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) ease,border-color var(--dur-fast) ease;
+}
+
+/* =====================================================================
+   SCROLL REVEAL SYSTEM
+   float: drifts up 40px + fades over .9s
+   rise: subtler 24px lift
+   scale: grows from .94
+   children of [data-stagger] cascade with 120ms delays
+   ===================================================================== */
+[data-reveal]{opacity:0;transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+[data-reveal="float"]{transform:translateY(40px)}
+[data-reveal="rise"]{transform:translateY(24px)}
+[data-reveal="scale"]{transform:scale(.94) translateY(16px)}
+[data-reveal].in{opacity:1;transform:none}
+[data-stagger]>*{opacity:0;transform:translateY(30px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out)}
+[data-stagger].in>*{opacity:1;transform:none}
+[data-stagger].in>*:nth-child(1){transition-delay:.05s}
+[data-stagger].in>*:nth-child(2){transition-delay:.17s}
+[data-stagger].in>*:nth-child(3){transition-delay:.29s}
+[data-stagger].in>*:nth-child(4){transition-delay:.41s}
+
+/* =====================================================================
+   1 — HERO
+   ===================================================================== */
+#hero{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:140px 0 90px}
+.hero-tag{font-size:11px;letter-spacing:.4em}
+#hero h1{
+  font-size:clamp(2.1rem,6vw,4.2rem);font-weight:900;line-height:1.15;margin-top:22px;
+  text-shadow:0 0 40px rgba(99,68,245,.5);
+}
+#hero h1 .line{display:block;opacity:0;transform:translateY(26px);animation:heroline 1s var(--ease-out) forwards}
+#hero h1 .line:nth-child(2){animation-delay:.25s;color:var(--heading)}
+@keyframes heroline{to{opacity:1;transform:none}}
+.hero-sub{margin:26px auto 0;max-width:560px;font-size:1.08rem;opacity:0;animation:heroline 1s var(--ease-out) .55s forwards}
+.hero-cta-wrap{margin-top:40px;opacity:0;animation:heroline 1s var(--ease-out) .8s forwards}
+.hero-price-note{margin-top:14px;font-size:.85rem;opacity:.75}
+.hero-pulse{animation:heroline 1s var(--ease-out) .8s forwards,pulse 3.2s ease-in-out 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 20px var(--glow-soft)}50%{box-shadow:0 0 36px rgba(99,68,245,.7)}}
+.scroll-hint{margin-top:70px;opacity:0;animation:heroline 1s ease 1.4s forwards}
+.scroll-hint span{display:inline-block;animation:bob 2.4s ease-in-out infinite;color:var(--heading);font-size:1.3rem}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* =====================================================================
+   2 — WHAT IS BEACON GAZE (three floating columns)
+   ===================================================================== */
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:48px}
+.col-card{padding:34px 28px}
+.col-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 20px rgba(99,68,245,.22);border-color:rgba(155,134,255,.5)}
+.col-card .glyph{font-size:1.9rem;color:var(--heading)}
+.col-card h3{font-size:.95rem;margin-top:16px;letter-spacing:.12em}
+.col-card p{margin-top:12px;font-size:.95rem}
+.col-card .price-tag{color:#fff;font-weight:700}
+
+/* =====================================================================
+   3 — HOW IT WORKS (step reveal, connected beam)
+   ===================================================================== */
+.steps{position:relative;margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.steps::before{
+  content:"";position:absolute;top:44px;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(99,68,245,.7),transparent);
+  transform:scaleX(0);transform-origin:left;transition:transform 1.4s var(--ease-out) .3s;
+}
+.steps.in::before{transform:scaleX(1)}
+.step{text-align:center}
+.step .orb{
+  width:88px;height:88px;margin:0 auto;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(19,17,36,.85);border:1px solid rgba(99,68,245,.45);
+  box-shadow:0 0 18px rgba(99,68,245,.3);color:var(--heading);
+}
+.step h3{font-size:.85rem;margin-top:22px}
+.step p{margin-top:10px;font-size:.93rem;max-width:270px;margin-left:auto;margin-right:auto}
+.step small{display:block;margin-top:8px;font-size:.78rem;opacity:.6;letter-spacing:.2em;text-transform:uppercase}
+
+/* =====================================================================
+   4 — BLURRED PREVIEW
+   ===================================================================== */
+.preview-shell{position:relative;margin-top:52px;border-radius:16px;overflow:hidden;border:1px solid rgba(99,68,245,.35);box-shadow:0 0 40px rgba(99,68,245,.18)}
+.preview-doc{background:linear-gradient(180deg,#100e20,#0b0a17);padding:44px 40px;filter:blur(7px) saturate(1.1);transform:scale(1.02);user-select:none;pointer-events:none}
+.preview-doc h3{font-size:1.1rem;color:var(--heading)}
+.preview-doc .doc-row{display:flex;gap:28px;margin-top:26px;align-items:center}
+.preview-doc .sketch{
+  flex:0 0 180px;height:220px;border-radius:10px;border:1px solid rgba(155,134,255,.6);
+  background:radial-gradient(circle at 40% 30%,rgba(155,134,255,.35),rgba(19,17,36,.9));
+  display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(255,255,255,.8);
+}
+.preview-doc .doc-lines span{display:block;height:11px;border-radius:6px;background:rgba(165,161,184,.35);margin-bottom:12px}
+.preview-doc .doc-lines span:nth-child(1){width:90%}
+.preview-doc .doc-lines span:nth-child(2){width:75%}
+.preview-doc .doc-lines span:nth-child(3){width:83%}
+.preview-doc .doc-lines span:nth-child(4){width:60%}
+.preview-veil{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  background:linear-gradient(180deg,rgba(8,7,17,.15),rgba(8,7,17,.72) 70%);text-align:center;padding:24px;
+}
+.preview-veil .lock{font-size:1.8rem;color:var(--heading);text-shadow:0 0 18px rgba(99,68,245,.8)}
+.preview-veil p{color:#fff;font-weight:600;max-width:420px}
+
+/* =====================================================================
+   5 — SOCIAL PROOF (constellation)
+   ===================================================================== */
+#proof{overflow:hidden}
+#constellation{position:absolute;inset:0;pointer-events:none;z-index:0}
+.quotes{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:52px}
+.quote{padding:30px 26px;position:relative}
+.quote::before{
+  content:"";position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;
+  transform:translateX(-50%);background:var(--heading);box-shadow:0 0 12px rgba(155,134,255,.9);
+}
+.quote .stars-row{color:#FFD66B;letter-spacing:3px;font-size:.9rem}
+.quote blockquote{margin:14px 0 0;font-style:italic;font-size:.95rem;color:#cfcbe4}
+.quote figcaption{margin-top:14px;font-size:.8rem;letter-spacing:.08em;color:var(--body)}
+.sample-badge{
+  position:absolute;top:14px;right:14px;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--heading);border:1px solid rgba(99,68,245,.45);border-radius:999px;padding:3px 10px;opacity:.85;
+}
+.proof-note{margin-top:26px;text-align:center;font-size:.85rem;opacity:.7}
+
+/* =====================================================================
+   6 — REAL TALK (pure typography)
+   ===================================================================== */
+#realtalk{text-align:center;padding:150px 0}
+#realtalk .big{
+  font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.4rem,3.2vw,2.2rem);
+  line-height:1.55;color:#E8E5F5;letter-spacing:.01em;text-transform:none;max-width:820px;margin:34px auto 0;
+}
+#realtalk .big strong{color:var(--heading);font-weight:600}
+#realtalk .quiet{margin-top:38px;font-size:1rem;max-width:620px;margin-left:auto;margin-right:auto}
+.rt-rule{width:80px;height:1px;margin:44px auto 0;background:linear-gradient(90deg,transparent,var(--glow),transparent)}
+
+/* =====================================================================
+   7 — PRICING
+   ===================================================================== */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;align-items:stretch}
+.tier{padding:38px 30px;display:flex;flex-direction:column;position:relative}
+.tier:hover{transform:translateY(-8px);box-shadow:0 16px 50px rgba(0,0,0,.5),0 0 28px rgba(99,68,245,.35);border-color:rgba(155,134,255,.6)}
+.tier.featured{border-color:rgba(155,134,255,.6);box-shadow:0 0 30px rgba(99,68,245,.28)}
+.tier .flag{
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
+  background:linear-gradient(135deg,#6344F5,#8b5cf6);color:#fff;padding:5px 14px;border-radius:999px;white-space:nowrap;
+}
+.tier h3{font-size:.85rem}
+.tier .amount{font-family:'Orbitron',sans-serif;font-weight:900;color:#fff;font-size:2.3rem;margin-top:14px}
+.tier .amount small{font-size:.85rem;color:var(--body);font-weight:400;letter-spacing:.05em}
+.tier ul{list-style:none;margin:22px 0 30px;padding:0;flex:1}
+.tier li{padding:9px 0;font-size:.92rem;border-bottom:1px dashed rgba(99,68,245,.22);display:flex;gap:10px}
+.tier li::before{content:"✦";color:var(--heading);flex:0 0 auto}
+.tier li:last-child{border-bottom:none}
+
+/* =====================================================================
+   8 — NEWSLETTER
+   ===================================================================== */
+#newsletter{text-align:center}
+.nl-form{margin:40px auto 0;max-width:560px;display:flex;flex-direction:column;gap:14px}
+.nl-form input{
+  background:rgba(19,17,36,.7);border:1px solid rgba(99,68,245,.35);border-radius:10px;
+  color:#fff;padding:16px 20px;font-size:1rem;font-family:'Inter',sans-serif;width:100%;
+  transition:border-color var(--dur-fast) ease,box-shadow var(--dur-fast) ease;
+}
+.nl-form input::placeholder{color:#5e5a75}
+.nl-form input:focus{border-color:var(--glow);box-shadow:0 0 16px rgba(99,68,245,.35);outline:none}
+.nl-note{margin-top:16px;font-size:.8rem;opacity:.65}
+
+/* =====================================================================
+   9 — FAQ
+   ===================================================================== */
+.faq-list{margin-top:48px;display:flex;flex-direction:column;gap:14px}
+.faq{overflow:hidden}
+.faq button{
+  all:unset;display:flex;justify-content:space-between;align-items:center;gap:16px;
+  width:100%;padding:22px 26px;cursor:pointer;color:#fff;font-weight:600;font-size:1rem;box-sizing:border-box;
+}
+.faq button .chev{color:var(--heading);transition:transform .45s var(--ease-out);flex:0 0 auto}
+.faq.open button .chev{transform:rotate(180deg)}
+.faq .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease-out)}
+.faq.open .body{grid-template-rows:1fr}
+.faq .body>div{overflow:hidden}
+.faq .body p{padding:0 26px 24px;font-size:.95rem}
+
+/* =====================================================================
+   10 — FOOTER (stars fade to near-black)
+   ===================================================================== */
+footer{
+  position:relative;z-index:var(--z-content);text-align:center;padding:120px 24px 60px;
+  background:linear-gradient(180deg,rgba(8,7,17,0),rgba(3,3,8,.92) 55%,#030308);
+}
+.foot-tag{
+  font-family:'Orbitron',sans-serif;letter-spacing:.28em;font-size:.8rem;color:var(--heading);
+  text-shadow:0 0 22px rgba(99,68,245,.75);animation:tagglow 4s ease-in-out infinite;
+}
+@keyframes tagglow{0%,100%{text-shadow:0 0 14px rgba(99,68,245,.55)}50%{text-shadow:0 0 30px rgba(155,134,255,.9)}}
+.foot-links{margin-top:34px;display:flex;justify-content:center;gap:28px;flex-wrap:wrap;font-size:.85rem}
+.foot-links a{text-decoration:none;color:var(--body);transition:color var(--dur-fast) ease}
+.foot-links a:hover{color:#fff}
+.foot-social{margin-top:22px;display:flex;justify-content:center;gap:18px}
+.foot-social a{color:var(--body);transition:color var(--dur-fast) ease,transform var(--dur-fast) var(--ease-out)}
+.foot-social a:hover{color:var(--heading);transform:translateY(-3px)}
+.foot-legal{margin-top:36px;font-size:.78rem;opacity:.55;max-width:640px;margin-left:auto;margin-right:auto;font-style:italic}
+
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);
+  z-index:var(--z-toast);background:var(--nebula);border:1px solid rgba(99,68,245,.5);
+  color:#fff;padding:13px 22px;border-radius:10px;font-size:.9rem;
+  opacity:0;pointer-events:none;transition:all var(--dur-fast) ease;max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* =====================================================================
+   MOBILE
+   ===================================================================== */
+@media (max-width:860px){
+  section{padding:80px 0}
+  .cols3,.steps,.quotes,.tiers{grid-template-columns:1fr}
+  .steps::before{display:none}
+  .preview-doc .doc-row{flex-direction:column}
+  .preview-doc .sketch{flex-basis:auto;width:160px}
+  #realtalk{padding:110px 0}
+  .tier.featured{order:-1}
+}
+@media (min-width:641px){
+  .nl-form{flex-direction:row}
+  .nl-form input{flex:1}
+}
+
+/* =====================================================================
+   REDUCED MOTION
+   ===================================================================== */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  [data-reveal],[data-stagger]>*{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<nav aria-label="Main">
+  <a class="logo" href="#hero">BEACON<em>GAZE</em></a>
+  <a class="nav-cta" href="#pricing">Get Your Reading</a>
+</nav>
+
+<!-- ============ 1 · HERO ============ -->
+<section id="hero">
+  <div class="wrap">
+    <p class="eyebrow hero-tag">✦ Personalized astrology readings ✦</p>
+    <h1>
+      <span class="line">Not a prediction.</span>
+      <span class="line">A direction.</span>
+    </h1>
+    <p class="hero-sub">
+      Beacon Gaze turns your birth chart into a beautifully written reading —
+      your archetype, your elemental balance, your season ahead — delivered to your inbox in minutes.
+    </p>
+    <div class="hero-cta-wrap hero-pulse" style="display:inline-block;border-radius:10px">
+      <a class="btn-primary" href="#pricing" data-checkout="basic">Get Your Reading — $14.99</a>
+    </div>
+    <p class="hero-price-note">Instant digital delivery · For entertainment &amp; self-reflection</p>
+    <div class="scroll-hint"><span aria-hidden="true">▾</span></div>
+  </div>
+</section>
+
+<!-- ============ 2 · WHAT IS BEACON GAZE ============ -->
+<section id="what">
+  <div class="wrap">
+    <div data-reveal="float">
+      <p class="eyebrow">The signal</p>
+      <h2 class="h2">What is Beacon Gaze?</h2>
+    </div>
+    <div class="cols3" data-stagger>
+      <div class="glass col-card">
+        <div class="glyph" aria-hidden="true">☉</div>
+        <h3>What it is</h3>
+        <p>A written astrology reading built from your exact birth details — sun sign, moon phase, element balance, and the archetype that runs through all of it. Crafted, not copy-pasted.</p>
+      </div>
+      <div class="glass col-card">
+        <div class="glyph" aria-hidden="true">✧</div>
+        <h3>What you get</h3>
+        <p>A multi-page reading in your inbox: your chart wheel, your archetype profile with original artwork, and a forecast for the season ahead — written to reflect, never to scare.</p>
+      </div>
+      <div class="glass col-card">
+        <div class="glyph" aria-hidden="true">◈</div>
+        <h3>What it costs</h3>
+        <p><span class="price-tag">From $14.99.</span> One-time. No subscription, no upsell funnel mid-reading, no "call this number." Pick a tier, get your reading, that's the whole deal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · HOW IT WORKS ============ -->
+<section id="how">
+  <div class="wrap">
+    <div data-reveal="float">
+      <p class="eyebrow">Three steps</p>
+      <h2 class="h2">How it works</h2>
+    </div>
+    <div class="steps" data-stagger data-reveal-extra>
+      <div class="step">
+        <div class="orb">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
+        </div>
+        <h3>Fill out your profile</h3>
+        <p>Birth date, time if you know it, and place. Two minutes, start to finish.</p>
+        <small>Step 01</small>
+      </div>
+      <div class="step">
+        <div class="orb">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+        </div>
+        <h3>We generate your blueprint</h3>
+        <p>Your chart is computed and your reading is composed around your archetype.</p>
+        <small>Step 02</small>
+      </div>
+      <div class="step">
+        <div class="orb">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+        </div>
+        <h3>Your reading arrives</h3>
+        <p>Delivered to your inbox within minutes, yours to keep forever.</p>
+        <small>Step 03</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 · BLURRED PREVIEW ============ -->
+<section id="preview">
+  <div class="wrap">
+    <div data-reveal="float">
+      <p class="eyebrow">A glimpse</p>
+      <h2 class="h2">Inside a reading</h2>
+      <p class="lede">Every reading is composed for one chart only. Here's the shape of what lands in your inbox — the full version is yours to unlock.</p>
+    </div>
+    <div class="preview-shell" data-reveal="scale">
+      <div class="preview-doc" aria-hidden="true">
+        <h3>YOUR COSMIC BLUEPRINT · SCORPIO SUN</h3>
+        <div class="doc-row">
+          <div class="sketch">♏</div>
+          <div class="doc-lines" style="flex:1">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="doc-row">
+          <div class="doc-lines" style="flex:1">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="sketch" style="height:150px;flex-basis:150px">☾</div>
+        </div>
+      </div>
+      <div class="preview-veil">
+        <div class="lock" aria-hidden="true">✦</div>
+        <p>Your archetype artwork, your chart wheel, and a season-ahead forecast — written for your birth details alone.</p>
+        <a class="btn-primary" href="#pricing">Unlock your full reading</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · SOCIAL PROOF ============ -->
+<section id="proof">
+  <canvas id="constellation" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div data-reveal="float" style="text-align:center">
+      <p class="eyebrow">Early signals</p>
+      <h2 class="h2">Join the first wave of readers</h2>
+    </div>
+    <div class="quotes" data-stagger>
+      <figure class="glass quote">
+        <span class="sample-badge">Sample</span>
+        <div class="stars-row" aria-label="5 out of 5 stars">★★★★★</div>
+        <blockquote>"It read like it was written about me, not at me. I've kept it in my saved folder ever since."</blockquote>
+        <figcaption>— Example review · replaced with verified quotes as they arrive</figcaption>
+      </figure>
+      <figure class="glass quote">
+        <span class="sample-badge">Sample</span>
+        <div class="stars-row" aria-label="5 out of 5 stars">★★★★★</div>
+        <blockquote>"The archetype artwork alone was worth it. The forecast gave me language for a season I was already feeling."</blockquote>
+        <figcaption>— Example review · replaced with verified quotes as they arrive</figcaption>
+      </figure>
+      <figure class="glass quote">
+        <span class="sample-badge">Sample</span>
+        <div class="stars-row" aria-label="5 out of 5 stars">★★★★★</div>
+        <blockquote>"No doom, no fear-bait, no 'act now.' Just a genuinely beautiful piece of writing about my chart."</blockquote>
+        <figcaption>— Example review · replaced with verified quotes as they arrive</figcaption>
+      </figure>
+    </div>
+    <p class="proof-note" data-reveal="rise">Beacon Gaze is newly launched — the quotes above are illustrative samples and will be swapped for real, verified reader reviews as they come in. We'd rather show you honest placeholders than invented praise.</p>
+  </div>
+</section>
+
+<!-- ============ 6 · REAL TALK ============ -->
+<section id="realtalk">
+  <div class="wrap narrow">
+    <p class="eyebrow" data-reveal="rise">Real talk</p>
+    <p class="big" data-reveal="float">
+      Astrology can't tell you your future. <strong>Nobody can.</strong>
+      What a great reading does is hand you a mirror — a language of archetypes
+      old enough and rich enough to help you see your own patterns clearly.
+      That's the whole product. <strong>A direction, not a destiny.</strong>
+    </p>
+    <div class="rt-rule" data-reveal="rise"></div>
+    <p class="quiet" data-reveal="rise">
+      So here's our promise: no fear tactics, no fake urgency, no claims that the stars have
+      decided anything for you. Every reading is for entertainment and self-reflection.
+      If you're navigating something heavy — health, money, a relationship on the edge —
+      a reading can keep you company, but a professional should keep you counsel.
+    </p>
+  </div>
+</section>
+
+<!-- ============ 7 · PRICING ============ -->
+<section id="pricing">
+  <div class="wrap">
+    <div data-reveal="float" style="text-align:center">
+      <p class="eyebrow">One-time · No subscription</p>
+      <h2 class="h2">Choose your reading</h2>
+    </div>
+    <div class="tiers" data-stagger>
+      <div class="glass tier">
+        <h3>Basic Reading</h3>
+        <div class="amount">$14.99 <small>one-time</small></div>
+        <ul>
+          <li>Sun sign &amp; moon phase reading</li>
+          <li>Your core archetype profile</li>
+          <li>Elemental balance breakdown</li>
+          <li>Delivered by email in minutes</li>
+        </ul>
+        <button class="btn-primary" data-checkout="basic">Get Basic — $14.99</button>
+      </div>
+      <div class="glass tier featured">
+        <span class="flag">Most chosen</span>
+        <h3>Full Report</h3>
+        <div class="amount">$24.99 <small>one-time</small></div>
+        <ul>
+          <li>Everything in Basic</li>
+          <li>Season-ahead forecast (3 months)</li>
+          <li>Compatibility overview by element</li>
+          <li>Printable chart wheel (PDF)</li>
+        </ul>
+        <button class="btn-primary" data-checkout="full">Get Full — $24.99</button>
+      </div>
+      <div class="glass tier">
+        <h3>Premium Blueprint</h3>
+        <div class="amount">$49.99 <small>one-time</small></div>
+        <ul>
+          <li>Everything in Full Report</li>
+          <li>Original archetype artwork of your sign</li>
+          <li>12-month cosmic forecast</li>
+          <li>Priority delivery &amp; keepsake PDF edition</li>
+        </ul>
+        <button class="btn-primary" data-checkout="premium">Get Premium — $49.99</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 · NEWSLETTER ============ -->
+<section id="newsletter">
+  <div class="wrap narrow">
+    <div data-reveal="float">
+      <p class="eyebrow">An open invitation</p>
+      <h2 class="h2">Your free weekly cosmic forecast</h2>
+      <p class="lede" style="margin-left:auto;margin-right:auto">One short, well-written email every Sunday. The week's sky, one reflection prompt, zero spam.</p>
+    </div>
+    <form class="nl-form" id="nl-form" data-reveal="rise" novalidate>
+      <input type="text" id="nl-name" name="FIRSTNAME" placeholder="First name" autocomplete="given-name" aria-label="First name">
+      <input type="email" id="nl-email" name="EMAIL" placeholder="you@example.com" autocomplete="email" required aria-label="Email address">
+      <button class="btn-primary" type="submit" style="padding:16px 26px;font-size:.78rem">Join free</button>
+    </form>
+    <p class="nl-note" data-reveal="rise">Unsubscribe anytime with one click. We never sell or share your email.</p>
+  </div>
+</section>
+
+<!-- ============ 9 · FAQ ============ -->
+<section id="faq">
+  <div class="wrap narrow">
+    <div data-reveal="float" style="text-align:center">
+      <p class="eyebrow">Before you ask</p>
+      <h2 class="h2">Questions, answered straight</h2>
+    </div>
+    <div class="faq-list" data-reveal="rise">
+      <div class="glass faq">
+        <button aria-expanded="false"><span>Is this real astrology?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div class="body"><div><p>Yes and no, honestly. Your chart data — sun sign, moon phase, elements, modalities — is computed from your real birth details using the traditional Western astrology framework. But astrology isn't science and we won't pretend it is: readings are for entertainment and self-reflection, and we write them as a mirror for thinking, never as predictions or advice.</p></div></div>
+      </div>
+      <div class="glass faq">
+        <button aria-expanded="false"><span>Is my data safe?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div class="body"><div><p>Your birth details and email are used for exactly one thing: generating and delivering your reading (plus the newsletter, if you opt in). We don't sell your data, we don't share it with advertisers, and you can request deletion anytime via the contact link below. Full details live in our Privacy Policy.</p></div></div>
+      </div>
+      <div class="glass faq">
+        <button aria-expanded="false"><span>What do I actually receive?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div class="body"><div><p>A written digital reading delivered by email: your chart wheel, your archetype profile, and — depending on tier — a seasonal or 12-month forecast, compatibility overview, and original archetype artwork as a keepsake PDF. It's a piece of personalized writing and art, not a physical product and not a promise about your future.</p></div></div>
+      </div>
+      <div class="glass faq">
+        <button aria-expanded="false"><span>How long does it take?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div class="body"><div><p>Most readings arrive within minutes of checkout. Premium Blueprints with custom artwork can take up to 24 hours. If yours hasn't landed, check spam first, then email us — we'll re-send it right away.</p></div></div>
+      </div>
+      <div class="glass faq">
+        <button aria-expanded="false"><span>What's the refund policy?</span><span class="chev" aria-hidden="true">▾</span></button>
+        <div class="body"><div><p>If your reading isn't what you hoped for, email us within 7 days of purchase and we'll refund you in full — no forms, no interrogation. We'd rather lose $14.99 than keep an unhappy reader.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 · FOOTER ============ -->
+<footer>
+  <a class="logo" href="#hero">BEACON<em>GAZE</em></a>
+  <p class="foot-tag" style="margin-top:26px">Not a prediction. A direction.</p>
+  <div class="foot-links">
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="mailto:hello@beacongaze.com">Contact</a>
+  </div>
+  <div class="foot-social" aria-label="Social links">
+    <a href="https://www.tiktok.com/" aria-label="TikTok" rel="noopener" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.78.12V9.77a5.76 5.76 0 0 0-.78-.06 5.69 5.69 0 1 0 5.69 5.69V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.25-1.48z"/></svg>
+    </a>
+    <a href="https://www.instagram.com/" aria-label="Instagram" rel="noopener" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a href="https://www.pinterest.com/" aria-label="Pinterest" rel="noopener" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.64 19.31c-.05-.8-.1-2.03.02-2.9l1.17-4.95s-.3-.6-.3-1.48c0-1.39.8-2.42 1.81-2.42.85 0 1.26.64 1.26 1.41 0 .86-.55 2.14-.83 3.33-.24 1 .5 1.81 1.48 1.81 1.78 0 3.15-1.88 3.15-4.59 0-2.4-1.72-4.08-4.19-4.08-2.85 0-4.53 2.14-4.53 4.35 0 .86.33 1.79.75 2.29a.3.3 0 0 1 .07.29l-.28 1.13c-.04.18-.15.22-.34.13-1.25-.58-2.03-2.4-2.03-3.87 0-3.16 2.29-6.06 6.61-6.06 3.47 0 6.17 2.47 6.17 5.78 0 3.45-2.18 6.23-5.2 6.23-1.01 0-1.97-.53-2.29-1.15l-.62 2.38c-.23.87-.84 1.96-1.25 2.63A10 10 0 1 0 12 2z"/></svg>
+    </a>
+  </div>
+  <p class="foot-legal">
+    For entertainment purposes only. Discover cosmic patterns, archetypes, and insights designed for
+    self-reflection and digital exploration. Readings are not medical, financial, legal, or relationship advice.
+    © 2026 Beacon Gaze.
+  </p>
+</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   CONFIG — paste your live links here
+   ===================================================================== */
+const CONFIG = {
+  checkout: {
+    basic:   "",   // e.g. "https://tally.so/r/yourBasicForm"
+    full:    "",   // e.g. "https://tally.so/r/yourFullForm"
+    premium: "",   // e.g. "https://tally.so/r/yourPremiumForm"
+  },
+  // Brevo: create an embedded form, copy its action URL here.
+  newsletterAction: "",  // e.g. "https://xxxxx.sibforms.com/serve/MUIFA..."
+};
+
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 3400);
+}
+
+/* =====================================================================
+   STARFIELD ENGINE
+   - 3 parallax depth bands (far / mid / near)
+   - mouse-tracked parallax (lerped, desktop only)
+   - scroll-velocity streaking: fast scroll stretches stars vertically
+   - nebula color zones interpolate with scroll progress
+   - fake depth-of-field: far stars smaller, dimmer, slightly blurred halo
+   - DPR capped at 1.5; pauses on hidden tab; static frame if reduced motion
+   ===================================================================== */
+(function starfield(){
+  const canvas = $("#stars");
+  const ctx = canvas.getContext("2d");
+  let W = 0, H = 0, dpr = 1, stars = [];
+  let mouse = {x: 0, y: 0}, mouseLerp = {x: 0, y: 0};
+  let lastScroll = window.scrollY, velocity = 0;
+  let running = true;
+
+  // nebula zones keyed to scroll progress [0..1]: [hue blobs]
+  const ZONES = [
+    { at: 0.00, a: [99, 68, 245],  b: [61, 44, 160]  },  // hero: violet
+    { at: 0.30, a: [80, 90, 230],  b: [62, 180, 190] },  // mid: violet→teal bleed
+    { at: 0.62, a: [150, 60, 200], b: [99, 68, 245]  },  // real talk: magenta warmth
+    { at: 1.00, a: [30, 24, 70],   b: [12, 10, 30]   },  // footer: near black
+  ];
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function zoneColors(p){
+    let i = 0;
+    while (i < ZONES.length - 2 && p > ZONES[i + 1].at) i++;
+    const z0 = ZONES[i], z1 = ZONES[i + 1];
+    const t = Math.min(1, Math.max(0, (p - z0.at) / (z1.at - z0.at)));
+    const mix = (c0, c1) => c0.map((v, k) => Math.round(lerp(v, c1[k], t)));
+    return { a: mix(z0.a, z1.a), b: mix(z0.b, z1.b) };
+  }
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const target = isCoarse ? 140 : Math.min(420, Math.floor(W * H / 4200));
+    stars = Array.from({length: target}, () => {
+      const depth = Math.random();                     // 0 far … 1 near
+      return {
+        x: Math.random() * W, y: Math.random() * H,
+        depth,
+        r: 0.4 + depth * 1.7,                          // near stars bigger
+        base: 0.25 + depth * 0.6,                      // near stars brighter
+        tw: Math.random() * Math.PI * 2,
+        twSpeed: 0.4 + Math.random() * 1.2,
+        drift: (Math.random() - 0.5) * 0.05,
+      };
+    });
+  }
+
+  function drawNebula(p){
+    const {a, b} = zoneColors(p);
+    const g1 = ctx.createRadialGradient(W * 0.22, H * (0.28 + p * 0.2), 0, W * 0.22, H * (0.28 + p * 0.2), Math.max(W, H) * 0.55);
+    g1.addColorStop(0, `rgba(${a[0]},${a[1]},${a[2]},0.10)`);
+    g1.addColorStop(1, "rgba(0,0,0,0)");
+    const g2 = ctx.createRadialGradient(W * 0.82, H * (0.72 - p * 0.25), 0, W * 0.82, H * (0.72 - p * 0.25), Math.max(W, H) * 0.5);
+    g2.addColorStop(0, `rgba(${b[0]},${b[1]},${b[2]},0.09)`);
+    g2.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
+  }
+
+  function frame(t){
+    if (!running) return;
+    const doc = document.documentElement;
+    const progress = Math.min(1, window.scrollY / Math.max(1, doc.scrollHeight - H));
+
+    // scroll velocity → streak factor, decays each frame
+    const sc = window.scrollY;
+    velocity = velocity * 0.9 + (sc - lastScroll) * 0.1;
+    lastScroll = sc;
+    const streak = Math.min(14, Math.abs(velocity) * 0.35);
+
+    // mouse parallax lerp (250ms feel)
+    mouseLerp.x = lerp(mouseLerp.x, mouse.x, 0.06);
+    mouseLerp.y = lerp(mouseLerp.y, mouse.y, 0.06);
+
+    ctx.clearRect(0, 0, W, H);
+    drawNebula(progress);
+
+    for (const s of stars){
+      const px = isCoarse ? 0 : mouseLerp.x * s.depth * 22;
+      // scroll parallax: near layers drift up faster as you scroll
+      const py = (isCoarse ? 0 : mouseLerp.y * s.depth * 22) - (sc * s.depth * 0.12) % (H + 40);
+      let y = s.y + py;
+      y = ((y % (H + 40)) + (H + 40)) % (H + 40) - 20;
+      let x = s.x + px + Math.sin(t / 4000 + s.tw) * s.drift * 40;
+
+      const twinkle = 0.65 + 0.35 * Math.sin(t / 900 * s.twSpeed + s.tw);
+      const alpha = s.base * twinkle;
+
+      if (streak > 1.5 && s.depth > 0.35){
+        // velocity streaking on nearer stars
+        ctx.strokeStyle = `rgba(200,190,255,${(alpha * 0.9).toFixed(3)})`;
+        ctx.lineWidth = s.r;
+        ctx.beginPath();
+        ctx.moveTo(x, y - streak * s.depth * Math.sign(velocity));
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      } else {
+        // far stars get a soft halo → fake depth of field
+        if (s.depth < 0.3){
+          ctx.fillStyle = `rgba(155,134,255,${(alpha * 0.35).toFixed(3)})`;
+          ctx.beginPath(); ctx.arc(x, y, s.r * 2.4, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = `rgba(220,214,255,${alpha.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(x, y, s.r, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    if (!reducedMotion) requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("resize", resize, {passive: true});
+  if (!isCoarse){
+    window.addEventListener("pointermove", e => {
+      mouse.x = (e.clientX / W - 0.5) * 2;
+      mouse.y = (e.clientY / H - 0.5) * 2;
+    }, {passive: true});
+  }
+  document.addEventListener("visibilitychange", () => {
+    running = !document.hidden;
+    if (running && !reducedMotion) requestAnimationFrame(frame);
+  });
+
+  resize();
+  requestAnimationFrame(frame); // draws one static frame under reduced motion
+})();
+
+/* =====================================================================
+   SCROLL REVEAL (IntersectionObserver, fires once per element)
+   ===================================================================== */
+(function reveals(){
+  const targets = $$("[data-reveal], [data-stagger]");
+  if (reducedMotion){ targets.forEach(el => el.classList.add("in")); return; }
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries){
+      if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+    }
+  }, {threshold: 0.18, rootMargin: "0px 0px -40px 0px"});
+  targets.forEach(el => io.observe(el));
+})();
+
+/* =====================================================================
+   CONSTELLATION LINES (social proof)
+   Connects the anchor dot above each quote card with faint lines,
+   redrawn on resize and after the stagger reveal completes.
+   ===================================================================== */
+(function constellation(){
+  const canvas = $("#constellation");
+  const section = $("#proof");
+  const ctx = canvas.getContext("2d");
+  function draw(){
+    const rect = section.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + "px"; canvas.style.height = rect.height + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const dots = $$(".quote").map(q => {
+      const r = q.getBoundingClientRect();
+      return { x: r.left - rect.left + r.width / 2, y: r.top - rect.top - 0 };
+    });
+    // scatter a few ambient dots between the anchors
+    const ambient = [];
+    for (let i = 0; i < 7; i++){
+      ambient.push({
+        x: rect.width * (0.08 + 0.84 * ((i * 0.618) % 1)),
+        y: rect.height * (0.12 + 0.30 * ((i * 0.377) % 1)),
+      });
+    }
+    const all = [...dots, ...ambient];
+    ctx.strokeStyle = "rgba(155,134,255,.18)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < all.length; i++){
+      for (let j = i + 1; j < all.length; j++){
+        const dx = all[i].x - all[j].x, dy = all[i].y - all[j].y;
+        if (Math.hypot(dx, dy) < rect.width * 0.4){
+          ctx.beginPath(); ctx.moveTo(all[i].x, all[i].y); ctx.lineTo(all[j].x, all[j].y); ctx.stroke();
+        }
+      }
+    }
+    ctx.fillStyle = "rgba(155,134,255,.55)";
+    ambient.forEach(d => { ctx.beginPath(); ctx.arc(d.x, d.y, 2, 0, Math.PI * 2); ctx.fill(); });
+  }
+  window.addEventListener("resize", () => requestAnimationFrame(draw), {passive: true});
+  window.addEventListener("load", draw);
+  setTimeout(draw, 1300); // after stagger reveal settles
+})();
+
+/* =====================================================================
+   FAQ ACCORDION (smooth 0fr→1fr grid expansion, no snaps)
+   ===================================================================== */
+$$(".faq button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const item = btn.closest(".faq");
+    const open = item.classList.contains("open");
+    $$(".faq.open").forEach(f => {
+      f.classList.remove("open");
+      f.querySelector("button").setAttribute("aria-expanded", "false");
+    });
+    if (!open){
+      item.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
+    }
+  });
+});
+
+/* =====================================================================
+   CHECKOUT BUTTONS → your Tally links (CONFIG.checkout)
+   ===================================================================== */
+$$("[data-checkout]").forEach(el => {
+  el.addEventListener("click", e => {
+    const tier = el.getAttribute("data-checkout");
+    const url = CONFIG.checkout[tier];
+    if (url){
+      e.preventDefault();
+      window.open(url, "_blank", "noopener");
+    } else if (el.tagName === "BUTTON"){
+      toast("Checkout link not connected yet — paste your Tally URL for '" + tier + "' into CONFIG.checkout at the top of the script.");
+    }
+    // anchor CTAs without a URL simply scroll to #pricing via their href
+  });
+});
+
+/* =====================================================================
+   NEWSLETTER → Brevo (CONFIG.newsletterAction)
+   ===================================================================== */
+$("#nl-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = $("#nl-email").value.trim();
+  const name = $("#nl-name").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    toast("That email doesn't look right — mind checking it?");
+    $("#nl-email").focus();
+    return;
+  }
+  if (!CONFIG.newsletterAction){
+    toast("Newsletter isn't wired up yet — paste your Brevo form action URL into CONFIG.newsletterAction.");
+    return;
+  }
+  try {
+    const data = new FormData();
+    data.append("EMAIL", email);
+    if (name) data.append("FIRSTNAME", name);
+    await fetch(CONFIG.newsletterAction, { method: "POST", body: data, mode: "no-cors" });
+    toast("You're in ✦ Your first forecast arrives Sunday.");
+    e.target.reset();
+  } catch {
+    toast("Something hiccuped — please try again in a moment.");
+  }
+});
+</script>
+</body>
+</html>
