@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BeaconGaze — Cosmic Charts & Live Events</title>
+<meta name="description" content="BeaconGaze: birth-chart style readings, zodiac archetypes, daily horoscopes, and Activation Passes for real live events. For entertainment purposes only.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-space:#080711;
+    --bg-nebula:#131124;
+    --primary-glow:#6344F5;
+    --text-heading:#9B86FF;
+    --text-body:#A5A1B8;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg-space);color:var(--text-body);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.6}
+  .font-display{font-family:'Orbitron',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+  .panel{
+    background:rgba(19,17,36,.82);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border:1px solid rgba(99,68,245,.25);
+    border-radius:8px;
+  }
+  .glow{box-shadow:0 0 15px rgba(99,68,245,.4)}
+  .glow-soft{box-shadow:0 0 24px rgba(99,68,245,.18)}
+  .divider{border-top:1px dashed #6344F5;opacity:.6}
+  .btn{transition:all .3s ease;border-radius:8px}
+  .btn:hover{transform:scale(1.02)}
+  .btn:active{transform:scale(.99)}
+  a,button,input,select{transition:all .3s ease}
+  :focus-visible{outline:2px solid #9B86FF;outline-offset:2px;border-radius:4px}
+  input,select{
+    background:var(--bg-nebula);
+    border:1px solid rgba(99,68,245,.35);
+    border-radius:8px;color:#fff;padding:.65rem .9rem;width:100%;
+  }
+  input::placeholder{color:#5e5a75}
+  input:focus,select:focus{border-color:var(--primary-glow);box-shadow:0 0 12px rgba(99,68,245,.35)}
+  select option{background:#131124}
+  .zodiac-chip{
+    min-width:64px;height:64px;display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;border-radius:8px;border:1px solid rgba(99,68,245,.25);
+    background:rgba(19,17,36,.9);color:var(--text-body);cursor:pointer;flex:0 0 auto;
+  }
+  .zodiac-chip:hover{border-color:rgba(155,134,255,.7);color:#fff}
+  .zodiac-chip.active{border:1px solid var(--primary-glow);color:#fff;box-shadow:0 0 15px rgba(99,68,245,.55);background:rgba(99,68,245,.18)}
+  .stepper-step{border:1px solid rgba(99,68,245,.35);color:var(--text-body)}
+  .stepper-step.active{background:var(--primary-glow);color:#fff;border-color:var(--primary-glow);box-shadow:0 0 15px rgba(99,68,245,.5)}
+  .kv-row{display:flex;justify-content:space-between;gap:1rem;padding:.6rem 0;border-bottom:1px dashed rgba(99,68,245,.25)}
+  .kv-row:last-child{border-bottom:none}
+  .kv-key{color:var(--text-body);display:flex;align-items:center;gap:.5rem;font-size:.9rem}
+  .kv-val{color:#fff;font-weight:700;text-align:right}
+  .gate-flash{animation:gateflash 1.6s ease}
+  @keyframes gateflash{
+    0%{box-shadow:0 0 0 rgba(52,211,153,0)}
+    15%{box-shadow:0 0 40px rgba(52,211,153,.9);border-color:#34d399}
+    70%{box-shadow:0 0 30px rgba(52,211,153,.6);border-color:#34d399}
+    100%{box-shadow:0 0 15px rgba(99,68,245,.4)}
+  }
+  .toast{
+    position:fixed;bottom:6.5rem;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#131124;border:1px solid rgba(99,68,245,.5);color:#fff;
+    padding:.75rem 1.25rem;border-radius:8px;opacity:0;pointer-events:none;
+    transition:all .3s ease;z-index:80;max-width:90vw;text-align:center;font-size:.9rem;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fade-in{animation:fadein .5s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+    html{scroll-behavior:auto}
+  }
+  .carousel-track{scrollbar-width:none}
+  .carousel-track::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ambient particle canvas -->
+<canvas id="dust" class="fixed inset-0 w-full h-full pointer-events-none" aria-hidden="true"></canvas>
+
+<!-- ===================== NAV ===================== -->
+<header class="fixed top-0 inset-x-0 z-50 panel !rounded-none !border-x-0 !border-t-0">
+  <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3" aria-label="Main">
+    <a href="#top" class="font-display font-bold text-lg" style="color:var(--text-heading)">
+      <span aria-hidden="true">✦</span> BeaconGaze
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm">
+      <a href="#chart" class="hover:text-white">Chart Reading</a>
+      <a href="#archetypes" class="hover:text-white">Archetypes</a>
+      <a href="#horoscope" class="hover:text-white">Daily Horoscope</a>
+      <a href="#events" class="hover:text-white">Events &amp; Passes</a>
+    </div>
+    <a href="#events" class="btn font-display text-xs font-bold px-4 py-2 text-white glow" style="background:linear-gradient(135deg,#6344F5,#8b5cf6)">Get a Pass</a>
+  </nav>
+</header>
+
+<main id="top" class="relative z-10 pt-24 pb-32">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 text-center py-14 sm:py-20">
+    <p class="font-display text-xs tracking-[.3em]" style="color:var(--text-heading)">Cosmic entertainment · Live experiences</p>
+    <h1 class="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-white mt-4 leading-tight">
+      Read the sky.<br><span style="color:var(--text-heading)">Then go see it live.</span>
+    </h1>
+    <p class="max-w-[650px] mx-auto mt-6 text-base sm:text-lg">
+      BeaconGaze pairs rich, beautifully rendered astrology content — chart-style readings, zodiac archetype
+      profiles, and daily horoscopes — with real ticketing for stargazing nights, planetarium sessions,
+      and cosmic live events near you.
+    </p>
+
+    <!-- Stepper -->
+    <nav class="mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3" aria-label="Site journey">
+      <span class="stepper-step active font-display text-[11px] px-3 py-2 rounded-lg">1 · Your Chart</span>
+      <span class="text-[#6344F5]" aria-hidden="true">→</span>
+      <span class="stepper-step font-display text-[11px] px-3 py-2 rounded-lg">2 · Archetype</span>
+      <span class="text-[#6344F5]" aria-hidden="true">→</span>
+      <span class="stepper-step font-display text-[11px] px-3 py-2 rounded-lg">3 · Horoscope</span>
+      <span class="text-[#6344F5]" aria-hidden="true">→</span>
+      <span class="stepper-step font-display text-[11px] px-3 py-2 rounded-lg">4 · Live Event</span>
+    </nav>
+  </section>
+
+  <!-- ===================== MODULE A1: CHART READING ===================== -->
+  <section id="chart" class="max-w-6xl mx-auto px-4 sm:px-6 py-12 scroll-mt-24">
+    <h2 class="font-display font-bold text-2xl sm:text-3xl" style="color:var(--text-heading)">1 · Chart-Style Reading</h2>
+    <p class="mt-2 max-w-2xl">Enter your birth details to generate a symbolic chart wheel: your Sun sign (astronomically dated), the real Moon phase on your birth date, and an elemental balance profile.</p>
+
+    <div class="mt-8 grid lg:grid-cols-2 gap-6">
+      <!-- Form -->
+      <div class="panel glow-soft p-6">
+        <h3 class="font-display text-sm font-bold text-white mb-4">Birth details</h3>
+        <div class="space-y-4">
+          <div>
+            <label for="bc-name" class="block text-sm mb-1">First name</label>
+            <input id="bc-name" type="text" placeholder="e.g. Riley" maxlength="24" autocomplete="given-name">
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label for="bc-date" class="block text-sm mb-1">Date of birth</label>
+              <input id="bc-date" type="date" min="1920-01-01" max="2026-07-02">
+            </div>
+            <div>
+              <label for="bc-time" class="block text-sm mb-1">Time of birth <span class="opacity-60">(optional)</span></label>
+              <input id="bc-time" type="time">
+            </div>
+          </div>
+          <button id="bc-generate" class="btn w-full font-display text-sm font-bold text-white py-3 glow" style="background:linear-gradient(135deg,#6344F5,#8b5cf6)">Generate my reading</button>
+          <p class="text-xs opacity-70">Symbolic reading for entertainment and self-reflection. Nothing here is predictive advice.</p>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="panel glow-soft p-6" id="bc-result" aria-live="polite">
+        <div id="bc-empty" class="h-full flex flex-col items-center justify-center text-center py-10">
+          <div class="text-5xl mb-4" aria-hidden="true">☉</div>
+          <p class="max-w-xs">Your chart wheel will render here — Sun sign, Moon phase, element balance, and an archetype summary.</p>
+        </div>
+        <div id="bc-filled" class="hidden">
+          <div class="flex flex-col sm:flex-row gap-6 items-center">
+            <div class="shrink-0 rounded-lg p-2" style="border:1px solid rgba(99,68,245,.5);box-shadow:0 0 15px rgba(99,68,245,.4)">
+              <svg id="bc-wheel" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Symbolic chart wheel"></svg>
+            </div>
+            <div class="w-full">
+              <h3 class="font-display font-bold text-white text-lg" id="bc-title">—</h3>
+              <p class="italic text-sm mt-1" id="bc-subtitle">—</p>
+              <div class="mt-4">
+                <div class="kv-row"><span class="kv-key">☉ Sun sign</span><span class="kv-val" id="bc-sun">—</span></div>
+                <div class="kv-row"><span class="kv-key">☾ Moon phase at birth</span><span class="kv-val" id="bc-moon">—</span></div>
+                <div class="kv-row"><span class="kv-key">△ Dominant element</span><span class="kv-val" id="bc-element">—</span></div>
+                <div class="kv-row"><span class="kv-key">◈ Modality</span><span class="kv-val" id="bc-modality">—</span></div>
+                <div class="kv-row"><span class="kv-key">♄ Ruling planet</span><span class="kv-val" id="bc-ruler">—</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="divider my-5"></div>
+          <p id="bc-reading" class="text-sm leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MODULE A2: ARCHETYPES ===================== -->
+  <section id="archetypes" class="max-w-6xl mx-auto px-4 sm:px-6 py-12 scroll-mt-24">
+    <h2 class="font-display font-bold text-2xl sm:text-3xl" style="color:var(--text-heading)">2 · Zodiac Archetype Profiles</h2>
+    <p class="mt-2 max-w-2xl">Twelve archetypes, each a study in element, modality, and temperament. Select a glyph to explore its full profile.</p>
+
+    <!-- Carousel -->
+    <div class="mt-8 flex items-center gap-3">
+      <button id="car-prev" class="btn zodiac-chip !min-w-[48px] !h-12 text-xl" aria-label="Scroll signs left">&lt;</button>
+      <div id="car-track" class="carousel-track flex gap-3 overflow-x-auto py-2 flex-1" role="tablist" aria-label="Zodiac signs"></div>
+      <button id="car-next" class="btn zodiac-chip !min-w-[48px] !h-12 text-xl" aria-label="Scroll signs right">&gt;</button>
+    </div>
+
+    <!-- Detail card -->
+    <div class="panel glow-soft mt-6 p-6 sm:p-8 fade-in" id="arch-card" aria-live="polite">
+      <div class="flex flex-col md:flex-row gap-8">
+        <div class="md:w-1/3 text-center">
+          <div class="inline-block rounded-lg p-3" style="border:1px solid rgba(99,68,245,.5);box-shadow:0 0 15px rgba(99,68,245,.4)">
+            <div class="w-36 h-36 flex items-center justify-center rounded-lg text-7xl" style="background:rgba(99,68,245,.12);color:#9B86FF" id="arch-glyph" aria-hidden="true">♈</div>
+          </div>
+          <p class="italic text-sm mt-3" style="font-size:.85rem" id="arch-caption">—</p>
+        </div>
+        <div class="md:w-2/3">
+          <h3 class="font-display font-bold text-2xl text-white" id="arch-name">—</h3>
+          <p class="mt-3 text-sm leading-relaxed" id="arch-desc">—</p>
+          <div class="grid sm:grid-cols-2 gap-x-8 mt-5">
+            <div class="kv-row"><span class="kv-key">Element</span><span class="kv-val" id="arch-element">—</span></div>
+            <div class="kv-row"><span class="kv-key">Modality</span><span class="kv-val" id="arch-modality">—</span></div>
+            <div class="kv-row"><span class="kv-key">Ruling planet</span><span class="kv-val" id="arch-ruler">—</span></div>
+            <div class="kv-row"><span class="kv-key">Season</span><span class="kv-val" id="arch-dates">—</span></div>
+          </div>
+          <div class="divider my-4"></div>
+          <div class="grid sm:grid-cols-2 gap-6 text-sm">
+            <div>
+              <h4 class="font-display text-xs font-bold text-white mb-2">Strengths</h4>
+              <p id="arch-strengths">—</p>
+            </div>
+            <div>
+              <h4 class="font-display text-xs font-bold text-white mb-2">Growth edges</h4>
+              <p id="arch-growth">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MODULE A3: DAILY HOROSCOPE ===================== -->
+  <section id="horoscope" class="max-w-6xl mx-auto px-4 sm:px-6 py-12 scroll-mt-24">
+    <h2 class="font-display font-bold text-2xl sm:text-3xl" style="color:var(--text-heading)">3 · Daily Horoscope</h2>
+    <p class="mt-2 max-w-2xl">A fresh reflection every day, deterministically drawn for each sign. Your selected archetype above carries through automatically.</p>
+
+    <div class="panel glow-soft mt-8 p-6 sm:p-8" aria-live="polite">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p class="font-display text-xs" style="color:var(--text-heading)" id="horo-date">—</p>
+          <h3 class="font-display font-bold text-xl text-white mt-1" id="horo-sign">—</h3>
+        </div>
+        <div class="flex gap-4 text-center">
+          <div class="panel px-4 py-2">
+            <p class="text-[11px] uppercase tracking-wider opacity-70">Lucky number</p>
+            <p class="font-display font-bold text-white text-lg" id="horo-lucky">—</p>
+          </div>
+          <div class="panel px-4 py-2">
+            <p class="text-[11px] uppercase tracking-wider opacity-70">Power color</p>
+            <p class="font-display font-bold text-white text-lg" id="horo-color">—</p>
+          </div>
+        </div>
+      </div>
+      <div class="divider my-5"></div>
+      <p class="leading-relaxed" id="horo-text">—</p>
+    </div>
+  </section>
+
+  <!-- ===================== MODULE B: EVENTS & ACTIVATION PASS ===================== -->
+  <section id="events" class="max-w-6xl mx-auto px-4 sm:px-6 py-12 scroll-mt-24">
+    <h2 class="font-display font-bold text-2xl sm:text-3xl" style="color:var(--text-heading)">4 · Live Events &amp; Activation Pass</h2>
+    <p class="mt-2 max-w-2xl">The Activation Pass is your entry ticket for BeaconGaze live experiences. Choose an event, personalize your pass, and present the barcode at the gate.</p>
+
+    <div class="mt-8 grid lg:grid-cols-5 gap-6">
+      <!-- Event list -->
+      <div class="lg:col-span-2 space-y-4" id="event-list" role="listbox" aria-label="Upcoming events"></div>
+
+      <!-- Pass -->
+      <div class="lg:col-span-3">
+        <div class="panel p-0 overflow-hidden glow" id="pass-card" style="border:1px solid rgba(99,68,245,.5)">
+          <div class="px-6 py-4 flex items-center justify-between" style="background:linear-gradient(135deg,rgba(99,68,245,.35),rgba(99,68,245,.1))">
+            <div>
+              <p class="font-display text-[10px] tracking-[.25em]" style="color:var(--text-heading)">Activation Pass</p>
+              <h3 class="font-display font-bold text-white text-lg" id="pass-event">—</h3>
+            </div>
+            <span class="text-3xl" aria-hidden="true">✦</span>
+          </div>
+          <div class="p-6">
+            <div class="mb-4">
+              <label for="pass-holder" class="block text-sm mb-1">Pass holder name</label>
+              <input id="pass-holder" type="text" placeholder="Name on the pass" maxlength="30">
+            </div>
+            <div class="grid sm:grid-cols-2 gap-x-8">
+              <div class="kv-row"><span class="kv-key">📍 Venue</span><span class="kv-val" id="pass-venue">—</span></div>
+              <div class="kv-row"><span class="kv-key">📅 Date</span><span class="kv-val" id="pass-date">—</span></div>
+              <div class="kv-row"><span class="kv-key">🕗 Doors</span><span class="kv-val" id="pass-time">—</span></div>
+              <div class="kv-row"><span class="kv-key">🎟 Zone</span><span class="kv-val" id="pass-zone">—</span></div>
+            </div>
+            <div class="divider my-5"></div>
+            <div class="rounded-lg bg-white p-4 text-center" id="barcode-box">
+              <svg id="pass-barcode" role="img" aria-label="Ticket barcode" class="mx-auto w-full max-w-md h-20"></svg>
+              <p class="text-[#131124] font-mono text-xs tracking-[.3em] mt-2" id="pass-id">—</p>
+            </div>
+            <div id="gate-status" class="hidden mt-4 rounded-lg text-center py-3 font-display font-bold text-sm" role="status"></div>
+            <div class="grid sm:grid-cols-3 gap-3 mt-5">
+              <button id="btn-wallet" class="btn panel py-3 text-sm font-bold text-white hover:border-[#9B86FF]"> Add to Apple Wallet</button>
+              <button id="btn-pdf" class="btn panel py-3 text-sm font-bold text-white hover:border-[#9B86FF]">⤓ Download PDF Pass</button>
+              <button id="btn-scan" class="btn py-3 text-sm font-display font-bold text-white glow" style="background:linear-gradient(135deg,#6344F5,#8b5cf6)">Scan Gate Simulator</button>
+            </div>
+            <p class="text-xs opacity-70 mt-4">Demo ticketing interface with sample events — connect your own inventory and gate hardware to go live. The barcode is a genuine Code 39 symbol of the pass ID and scans with standard readers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-8">
+    <div class="divider mb-8"></div>
+    <div class="text-center max-w-2xl mx-auto">
+      <p class="font-display text-xs font-bold" style="color:var(--text-heading)">✦ BeaconGaze</p>
+      <p class="text-sm mt-3 italic">
+        For entertainment purposes only. Discover cosmic patterns, archetypes, and insights designed
+        for self-reflection and digital exploration.
+      </p>
+      <p class="text-xs opacity-60 mt-4">© 2026 BeaconGaze. Event listings shown are demonstration data.</p>
+    </div>
+  </footer>
+</main>
+
+<!-- Sticky CTA -->
+<div class="fixed bottom-0 inset-x-0 z-40 p-3" style="background:linear-gradient(to top,rgba(8,7,17,.95),rgba(8,7,17,0))">
+  <a href="#chart" class="btn block max-w-3xl mx-auto text-center font-display font-bold text-white text-sm py-4 glow" style="background:linear-gradient(135deg,#6344F5,#8b5cf6);border-radius:8px">
+    Begin Your Alignment Journey
+  </a>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   BeaconGaze — unified global state engine + modules
+   ===================================================================== */
+const BG = (() => {
+  const state = {
+    name: "",
+    birthDate: null,      // "YYYY-MM-DD"
+    birthTime: null,      // "HH:MM"
+    activeSign: 0,        // index into ZODIAC
+    activeEvent: 0,       // index into EVENTS
+    ticketId: null,
+    holder: "",
+    scanned: false,
+  };
+  const listeners = [];
+  return {
+    get: () => state,
+    set(patch) {
+      Object.assign(state, patch);
+      listeners.forEach(fn => fn(state, patch));
+    },
+    subscribe(fn) { listeners.push(fn); },
+  };
+})();
+
+/* ---------------------------- data ---------------------------- */
+const ZODIAC = [
+  {name:"Aries", glyph:"♈", dates:"Mar 21 – Apr 19", element:"Fire", modality:"Cardinal", ruler:"Mars",
+   caption:"The Pioneer — Cardinal Fire", start:[3,21],
+   desc:"Aries opens the zodiac the way a match opens the dark: instantly, decisively, without a committee. This archetype thrives on beginnings — new projects, new terrain, the first move nobody else would make.",
+   strengths:"Courageous, direct, energizing to be around, fast to act and faster to recover.",
+   growth:"Impulse can outrun planning; patience and follow-through turn sparks into fires that last."},
+  {name:"Taurus", glyph:"♉", dates:"Apr 20 – May 20", element:"Earth", modality:"Fixed", ruler:"Venus",
+   caption:"The Builder — Fixed Earth", start:[4,20],
+   desc:"Taurus is the zodiac's gravity: steady, sensory, devoted to what is real and lasting. This archetype builds slowly and beautifully, valuing comfort, craft, and loyalty over noise.",
+   strengths:"Reliable, patient, aesthetically gifted, immovable in support of the people it loves.",
+   growth:"Stability can harden into stubbornness; flexibility keeps the garden growing."},
+  {name:"Gemini", glyph:"♊", dates:"May 21 – Jun 20", element:"Air", modality:"Mutable", ruler:"Mercury",
+   caption:"The Messenger — Mutable Air", start:[5,21],
+   desc:"Gemini is a live wire between minds — curious, quick, endlessly conversational. This archetype collects ideas the way others collect objects and connects people who would never otherwise meet.",
+   strengths:"Witty, adaptable, socially fluent, a natural translator between worlds.",
+   growth:"Breadth can crowd out depth; choosing one thread and following it is the quiet superpower."},
+  {name:"Cancer", glyph:"♋", dates:"Jun 21 – Jul 22", element:"Water", modality:"Cardinal", ruler:"Moon",
+   caption:"The Guardian — Cardinal Water", start:[6,21],
+   desc:"Cancer feels the room before entering it. This archetype leads through care — building homes, teams, and traditions that hold people safely while the tides change outside.",
+   strengths:"Deeply intuitive, protective, loyal, gifted at making any place feel like belonging.",
+   growth:"The shell that protects can also isolate; letting others in is where the strength shows."},
+  {name:"Leo", glyph:"♌", dates:"Jul 23 – Aug 22", element:"Fire", modality:"Fixed", ruler:"Sun",
+   caption:"The Sovereign — Fixed Fire", start:[7,23],
+   desc:"Leo is sunlight with a schedule. This archetype radiates warmth, drama, and generosity, turning ordinary rooms into stages and quiet efforts into celebrations.",
+   strengths:"Charismatic, big-hearted, creative, fiercely loyal to its chosen people.",
+   growth:"Applause is fuel but not food; the deepest shine comes when nobody is watching."},
+  {name:"Virgo", glyph:"♍", dates:"Aug 23 – Sep 22", element:"Earth", modality:"Mutable", ruler:"Mercury",
+   caption:"The Analyst — Mutable Earth", start:[8,23],
+   desc:"Virgo sees the system inside the chaos. This archetype refines, edits, and heals — devoted to making things genuinely work, not merely look like they do.",
+   strengths:"Precise, service-oriented, quietly brilliant, the person everyone trusts with the details.",
+   growth:"The inner critic is a tool, not a landlord; perfection is a direction, not an address."},
+  {name:"Libra", glyph:"♎", dates:"Sep 23 – Oct 22", element:"Air", modality:"Cardinal", ruler:"Venus",
+   caption:"The Diplomat — Cardinal Air", start:[9,23],
+   desc:"Libra weighs the world and finds the beautiful middle. This archetype is drawn to harmony, partnership, and design — the art of making things fair and making fairness lovely.",
+   strengths:"Gracious, fair-minded, socially magnetic, a gifted mediator and aesthete.",
+   growth:"Balance is a verb, not a pose; sometimes the scales settle only after you choose a side."},
+  {name:"Scorpio", glyph:"♏", dates:"Oct 23 – Nov 21", element:"Water", modality:"Fixed", ruler:"Pluto & Mars",
+   caption:"The Alchemist — Fixed Water", start:[10,23],
+   desc:"Scorpio goes where the surface ends. This archetype is intensity with a purpose — transformation, truth-finding, and loyalty that runs to the bone.",
+   strengths:"Perceptive, resilient, magnetic, unafraid of the depths others avoid.",
+   growth:"Control feels like safety but trust builds it; vulnerability is the final power move."},
+  {name:"Sagittarius", glyph:"♐", dates:"Nov 22 – Dec 21", element:"Fire", modality:"Mutable", ruler:"Jupiter",
+   caption:"The Explorer — Mutable Fire", start:[11,22],
+   desc:"Sagittarius is an arrow aimed at the horizon. This archetype hunts meaning — through travel, philosophy, humor, and the stubborn belief that the best chapter is the next one.",
+   strengths:"Optimistic, honest, adventurous, a natural teacher and storyteller.",
+   growth:"Freedom deepens when something is worth staying for; roots and wings can coexist."},
+  {name:"Capricorn", glyph:"♑", dates:"Dec 22 – Jan 19", element:"Earth", modality:"Cardinal", ruler:"Saturn",
+   caption:"The Architect — Cardinal Earth", start:[12,22],
+   desc:"Capricorn plays the long game and wins it. This archetype climbs with discipline and dry wit, building legacies where others build weekends.",
+   strengths:"Ambitious, responsible, strategic, unshakeable under pressure.",
+   growth:"The summit is sweeter shared; rest is part of the architecture, not a flaw in it."},
+  {name:"Aquarius", glyph:"♒", dates:"Jan 20 – Feb 18", element:"Air", modality:"Fixed", ruler:"Uranus & Saturn",
+   caption:"The Visionary — Fixed Air", start:[1,20],
+   desc:"Aquarius lives ten years ahead of the calendar. This archetype questions defaults, champions the collective, and treats originality as a civic duty.",
+   strengths:"Inventive, principled, humanitarian, immune to peer pressure.",
+   growth:"The future needs the present's hand; ideals land hardest when delivered warmly."},
+  {name:"Pisces", glyph:"♓", dates:"Feb 19 – Mar 20", element:"Water", modality:"Mutable", ruler:"Neptune & Jupiter",
+   caption:"The Dreamer — Mutable Water", start:[2,19],
+   desc:"Pisces dissolves the border between self and everything else. This archetype feels in oceans — artistic, compassionate, tuned to frequencies the rest of the zodiac misses.",
+   strengths:"Empathic, imaginative, healing to be near, endlessly creative.",
+   growth:"Boundaries are not walls but shorelines; they give the ocean a place to be beautiful."},
+];
+
+const EVENTS = [
+  {code:"EQNX", name:"Equinox Sessions: Live Chart Night", venue:"The Observatory Hall",
+   date:"Sat, Sep 26 2026", time:"7:30 PM", zone:"GA · Nebula Floor",
+   blurb:"Astrologers read audience charts live on the dome projector, followed by a guided telescope session."},
+  {code:"PRSD", name:"Perseid Meteor Watch Party", venue:"Highline Dark-Sky Park",
+   date:"Wed, Aug 12 2026", time:"9:00 PM", zone:"Blanket Zone B",
+   blurb:"Peak-night meteor watching with hot drinks, star-mapping stations, and zero city glow."},
+  {code:"LUNA", name:"Full Moon Sound Bath", venue:"Riverside Planetarium",
+   date:"Fri, Oct 30 2026", time:"8:00 PM", zone:"Reclined · Row C",
+   blurb:"A 360° projected moonrise paired with live gong and crystal-bowl performance under the dome."},
+];
+
+const ELEMENT_OF = {Fire:"Fire", Earth:"Earth", Air:"Air", Water:"Water"};
+
+/* ---------------------------- utilities ---------------------------- */
+const $ = id => document.getElementById(id);
+
+function seededRandom(seedStr){
+  // xmur3 hash → mulberry32 PRNG (deterministic per seed string)
+  let h = 1779033703 ^ seedStr.length;
+  for (let i = 0; i < seedStr.length; i++){
+    h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = (h >>> 0) || 1;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
+
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+/* ---------------------------- astro math ---------------------------- */
+function sunSignIndex(month, day){
+  const md = month * 100 + day;
+  const bounds = [
+    [321,419,0],[420,520,1],[521,620,2],[621,722,3],[723,822,4],[823,922,5],
+    [923,1022,6],[1023,1121,7],[1122,1221,8],[1222,1231,9],[101,119,9],
+    [120,218,10],[219,320,11]
+  ];
+  for (const [a,b,idx] of bounds) if (md >= a && md <= b) return idx;
+  return 9;
+}
+
+function moonPhase(dateObj){
+  // real synodic-cycle calculation from the Jan 6 2000 18:14 UTC new moon
+  const synodic = 29.53058867;
+  const epoch = Date.UTC(2000, 0, 6, 18, 14);
+  let days = (dateObj.getTime() - epoch) / 86400000;
+  let phase = ((days % synodic) + synodic) % synodic / synodic; // 0..1
+  const names = ["New Moon","Waxing Crescent","First Quarter","Waxing Gibbous",
+                 "Full Moon","Waning Gibbous","Last Quarter","Waning Crescent"];
+  const idx = Math.floor((phase * 8) + 0.5) % 8;
+  return names[idx];
+}
+
+/* ---------------------------- Module A1: chart ---------------------------- */
+function drawWheel(svg, sunIdx, seed){
+  const rng = seededRandom("wheel:" + seed);
+  const cx = 100, cy = 100, rOuter = 92, rInner = 60;
+  let s = "";
+  s += `<circle cx="${cx}" cy="${cy}" r="${rOuter}" fill="none" stroke="rgba(99,68,245,.5)" stroke-width="1.5"/>`;
+  s += `<circle cx="${cx}" cy="${cy}" r="${rInner}" fill="none" stroke="rgba(99,68,245,.35)" stroke-width="1" stroke-dasharray="3 4"/>`;
+  for (let i = 0; i < 12; i++){
+    const a0 = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const x1 = cx + Math.cos(a0) * rInner, y1 = cy + Math.sin(a0) * rInner;
+    const x2 = cx + Math.cos(a0) * rOuter, y2 = cy + Math.sin(a0) * rOuter;
+    s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(99,68,245,.35)" stroke-width="1"/>`;
+    const mid = a0 + Math.PI / 12;
+    const gx = cx + Math.cos(mid) * ((rOuter + rInner) / 2);
+    const gy = cy + Math.sin(mid) * ((rOuter + rInner) / 2);
+    const isSun = i === sunIdx;
+    s += `<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" text-anchor="middle" dominant-baseline="central"
+          font-size="13" fill="${isSun ? "#FFFFFF" : "#9B86FF"}" ${isSun ? 'font-weight="bold"' : ""}>${ZODIAC[i].glyph}</text>`;
+    if (isSun){
+      const a1 = a0 + Math.PI / 6;
+      const large = 0;
+      const p1x = cx + Math.cos(a0)*rOuter, p1y = cy + Math.sin(a0)*rOuter;
+      const p2x = cx + Math.cos(a1)*rOuter, p2y = cy + Math.sin(a1)*rOuter;
+      const p3x = cx + Math.cos(a1)*rInner, p3y = cy + Math.sin(a1)*rInner;
+      const p4x = cx + Math.cos(a0)*rInner, p4y = cy + Math.sin(a0)*rInner;
+      s = `<path d="M${p1x.toFixed(1)} ${p1y.toFixed(1)} A${rOuter} ${rOuter} 0 ${large} 1 ${p2x.toFixed(1)} ${p2y.toFixed(1)} L${p3x.toFixed(1)} ${p3y.toFixed(1)} A${rInner} ${rInner} 0 ${large} 0 ${p4x.toFixed(1)} ${p4y.toFixed(1)} Z" fill="rgba(99,68,245,.28)"/>` + s;
+    }
+  }
+  // symbolic inner "planet" markers, deterministic per birth details
+  const glyphs = ["☿","♀","♂","♃","♄"];
+  glyphs.forEach(g => {
+    const a = rng() * Math.PI * 2, r = 18 + rng() * 34;
+    const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+    s += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="11" fill="#A5A1B8">${g}</text>`;
+  });
+  s += `<circle cx="${cx}" cy="${cy}" r="3" fill="#6344F5"/>`;
+  svg.innerHTML = s;
+}
+
+function generateReading(){
+  const name = $("bc-name").value.trim();
+  const dateStr = $("bc-date").value;
+  const timeStr = $("bc-time").value;
+  if (!dateStr){ toast("Add a date of birth to generate your reading."); $("bc-date").focus(); return; }
+
+  const [Y, M, D] = dateStr.split("-").map(Number);
+  const birth = new Date(Date.UTC(Y, M - 1, D, timeStr ? +timeStr.split(":")[0] : 12, timeStr ? +timeStr.split(":")[1] : 0));
+  const sunIdx = sunSignIndex(M, D);
+  const sign = ZODIAC[sunIdx];
+  const phase = moonPhase(birth);
+
+  BG.set({ name, birthDate: dateStr, birthTime: timeStr || null, activeSign: sunIdx,
+           holder: BG.get().holder || name });
+
+  $("bc-empty").classList.add("hidden");
+  const filled = $("bc-filled");
+  filled.classList.remove("hidden");
+  filled.classList.remove("fade-in"); void filled.offsetWidth; filled.classList.add("fade-in");
+
+  $("bc-title").textContent = (name ? name + " · " : "") + sign.name + " Sun";
+  $("bc-subtitle").textContent = sign.caption + " · born under a " + phase.toLowerCase();
+  $("bc-sun").textContent = sign.glyph + " " + sign.name;
+  $("bc-moon").textContent = phase;
+  $("bc-element").textContent = sign.element;
+  $("bc-modality").textContent = sign.modality;
+  $("bc-ruler").textContent = sign.ruler;
+
+  const rng = seededRandom("reading:" + dateStr + ":" + (timeStr || ""));
+  const lens = pick(rng, ["momentum","stillness","connection","curiosity","craft","renewal"]);
+  const arena = pick(rng, ["creative work","close relationships","daily rhythms","long-term plans","learning","home base"]);
+  $("bc-reading").textContent =
+    `As a ${sign.element.toLowerCase()}-element ${sign.modality.toLowerCase()} sign ruled by ${sign.ruler}, ` +
+    `the ${sign.name} archetype expresses itself through ${sign.caption.split("—")[0].trim().toLowerCase()} energy. ` +
+    `${sign.desc} In this symbolic chart, the emphasis falls on ${lens} within your ${arena} — ` +
+    `a lens for self-reflection rather than prediction. Explore the full ${sign.name} archetype profile below.`;
+
+  drawWheel($("bc-wheel"), sunIdx, dateStr + (timeStr || ""));
+  if (name && !$("pass-holder").value) $("pass-holder").value = name;
+  toast("Reading generated — your archetype and horoscope updated to " + sign.name + ".");
+}
+
+/* ---------------------------- Module A2: archetypes ---------------------------- */
+function buildCarousel(){
+  const track = $("car-track");
+  track.innerHTML = "";
+  ZODIAC.forEach((z, i) => {
+    const b = document.createElement("button");
+    b.className = "zodiac-chip btn";
+    b.setAttribute("role","tab");
+    b.setAttribute("aria-label", z.name);
+    b.title = z.name;
+    b.textContent = z.glyph;
+    b.addEventListener("click", () => BG.set({ activeSign: i }));
+    track.appendChild(b);
+  });
+  $("car-prev").addEventListener("click", () => track.scrollBy({left:-240, behavior:"smooth"}));
+  $("car-next").addEventListener("click", () => track.scrollBy({left: 240, behavior:"smooth"}));
+}
+
+function renderArchetype(){
+  const i = BG.get().activeSign;
+  const z = ZODIAC[i];
+  [...$("car-track").children].forEach((el, j) => {
+    el.classList.toggle("active", j === i);
+    el.setAttribute("aria-selected", j === i ? "true" : "false");
+  });
+  const card = $("arch-card");
+  card.classList.remove("fade-in"); void card.offsetWidth; card.classList.add("fade-in");
+  $("arch-glyph").textContent = z.glyph;
+  $("arch-caption").textContent = z.caption;
+  $("arch-name").textContent = z.name;
+  $("arch-desc").textContent = z.desc;
+  $("arch-element").textContent = z.element;
+  $("arch-modality").textContent = z.modality;
+  $("arch-ruler").textContent = z.ruler;
+  $("arch-dates").textContent = z.dates;
+  $("arch-strengths").textContent = z.strengths;
+  $("arch-growth").textContent = z.growth;
+}
+
+/* ---------------------------- Module A3: horoscope ---------------------------- */
+function renderHoroscope(){
+  const z = ZODIAC[BG.get().activeSign];
+  const now = new Date();
+  const dayKey = now.toISOString().slice(0,10);
+  const rng = seededRandom("horo:" + z.name + ":" + dayKey);
+
+  const openers = [
+    "The sky leans in your favor today,", "A quieter current runs beneath the day,",
+    "Momentum gathers where you least expect it,", "Today rewards a lighter grip,",
+    "Small signals carry big meaning today,", "The day opens like a clear night sky,"
+  ];
+  const themes = [
+    "and a conversation you have been postponing finally finds its natural opening",
+    "and an old idea resurfaces wearing much better timing",
+    "and your instinct to simplify turns out to be exactly right",
+    "and someone notices the effort you assumed was invisible",
+    "and a small detour leads somewhere more interesting than the plan",
+    "and finishing one lingering task clears far more mental sky than expected"
+  ];
+  const advice = [
+    "Lean into your " + z.element.toLowerCase() + "-sign strengths: " + z.strengths.split(",")[0].toLowerCase() + " energy will carry the afternoon.",
+    "Your " + z.modality.toLowerCase() + " nature is the asset today — set the pace instead of matching someone else's.",
+    "Channel " + z.ruler + "'s influence: choose depth over speed and the evening will thank you.",
+    "Treat one small ritual as sacred today — the " + z.name + " archetype recharges through intention, not volume."
+  ];
+  const colors = ["Violet","Silver","Deep Teal","Amber","Indigo","Rose Gold","Emerald","Cobalt"];
+
+  $("horo-date").textContent = now.toLocaleDateString(undefined, {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+  $("horo-sign").textContent = z.glyph + " " + z.name;
+  $("horo-lucky").textContent = String(Math.floor(rng() * 99) + 1);
+  $("horo-color").textContent = pick(rng, colors);
+  $("horo-text").textContent = pick(rng, openers) + " " + pick(rng, themes) + ". " + pick(rng, advice) +
+    " A reflection drawn for the " + z.name + " archetype — read it as a mirror, not a map.";
+}
+
+/* ---------------------------- Module B: events & pass ---------------------------- */
+function newTicketId(ev){
+  let tail = "";
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  for (let i = 0; i < 5; i++) tail += chars[Math.floor(Math.random() * chars.length)];
+  return "BGZ-" + ev.code + "-" + tail;
+}
+
+function buildEventList(){
+  const list = $("event-list");
+  list.innerHTML = "";
+  EVENTS.forEach((ev, i) => {
+    const b = document.createElement("button");
+    b.className = "btn panel w-full text-left p-5 block";
+    b.setAttribute("role","option");
+    b.innerHTML =
+      `<p class="font-display text-[10px] tracking-[.25em]" style="color:var(--text-heading)">${ev.date} · ${ev.time}</p>
+       <h3 class="font-display font-bold text-white mt-1">${ev.name}</h3>
+       <p class="text-sm mt-2">${ev.blurb}</p>
+       <p class="text-xs mt-3 opacity-80">📍 ${ev.venue} · ${ev.zone}</p>`;
+    b.addEventListener("click", () => BG.set({ activeEvent: i, ticketId: newTicketId(ev), scanned: false }));
+    list.appendChild(b);
+  });
+}
+
+/* --- genuine Code 39 barcode (SVG) --- */
+const CODE39 = {
+  "0":"nnnwwnwnn","1":"wnnwnnnnw","2":"nnwwnnnnw","3":"wnwwnnnnn","4":"nnnwwnnnw",
+  "5":"wnnwwnnnn","6":"nnwwwnnnn","7":"nnnwnnwnw","8":"wnnwnnwnn","9":"nnwwnnwnn",
+  "A":"wnnnnwnnw","B":"nnwnnwnnw","C":"wnwnnwnnn","D":"nnnnwwnnw","E":"wnnnwwnnn",
+  "F":"nnwnwwnnn","G":"nnnnnwwnw","H":"wnnnnwwnn","I":"nnwnnwwnn","J":"nnnnwwwnn",
+  "K":"wnnnnnnww","L":"nnwnnnnww","M":"wnwnnnnwn","N":"nnnnwnnww","O":"wnnnwnnwn",
+  "P":"nnwnwnnwn","Q":"nnnnnnwww","R":"wnnnnnwwn","S":"nnwnnnwwn","T":"nnnnwnwwn",
+  "U":"wwnnnnnnw","V":"nwwnnnnnw","W":"wwwnnnnnn","X":"nwnnwnnnw","Y":"wwnnwnnnn",
+  "Z":"nwwnwnnnn","-":"nwnnnnwnw",".":"wwnnnnwnn"," ":"nwwnnnwnn","*":"nwnnwnwnn"
+};
+function code39Bars(text){
+  // returns array of {x,w} bar rectangles in unit widths, plus total width
+  const narrow = 1, wide = 2.6, gap = narrow;
+  const full = "*" + text.toUpperCase().replace(/[^0-9A-Z\-\. ]/g,"") + "*";
+  const bars = []; let x = 0;
+  for (const ch of full){
+    const pat = CODE39[ch]; if (!pat) continue;
+    for (let i = 0; i < 9; i++){
+      const w = pat[i] === "w" ? wide : narrow;
+      if (i % 2 === 0) bars.push({x, w});   // even index = bar, odd = space
+      x += w;
+    }
+    x += gap; // inter-character space
+  }
+  return { bars, total: x - gap };
+}
+function renderBarcode(){
+  const st = BG.get();
+  const id = st.ticketId;
+  const svg = $("pass-barcode");
+  const { bars, total } = code39Bars(id);
+  const H = 64;
+  let s = "";
+  bars.forEach(b => {
+    s += `<rect x="${b.x.toFixed(2)}" y="0" width="${b.w.toFixed(2)}" height="${H}" fill="#080711"/>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${total.toFixed(2)} ${H}`);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.innerHTML = s;
+  $("pass-id").textContent = id;
+}
+
+function renderPass(){
+  const st = BG.get();
+  const ev = EVENTS[st.activeEvent];
+  [...$("event-list").children].forEach((el, j) => {
+    el.style.borderColor = j === st.activeEvent ? "#6344F5" : "rgba(99,68,245,.25)";
+    el.style.boxShadow = j === st.activeEvent ? "0 0 15px rgba(99,68,245,.4)" : "none";
+    el.setAttribute("aria-selected", j === st.activeEvent ? "true" : "false");
+  });
+  $("pass-event").textContent = ev.name;
+  $("pass-venue").textContent = ev.venue;
+  $("pass-date").textContent = ev.date;
+  $("pass-time").textContent = ev.time;
+  $("pass-zone").textContent = ev.zone;
+  renderBarcode();
+}
+
+/* --- draw the pass to a canvas (used for PDF export) --- */
+function renderPassToCanvas(){
+  const st = BG.get();
+  const ev = EVENTS[st.activeEvent];
+  const W = 1000, H = 560;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+
+  g.fillStyle = "#131124"; g.fillRect(0, 0, W, H);
+  const grad = g.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, "rgba(99,68,245,.45)"); grad.addColorStop(1, "rgba(99,68,245,.12)");
+  g.fillStyle = grad; g.fillRect(0, 0, W, 110);
+  g.strokeStyle = "#6344F5"; g.lineWidth = 4; g.strokeRect(2, 2, W - 4, H - 4);
+
+  g.fillStyle = "#9B86FF"; g.font = "bold 20px 'Plus Jakarta Sans', sans-serif";
+  g.fillText("BEACONGAZE · ACTIVATION PASS", 40, 48);
+  g.fillStyle = "#FFFFFF"; g.font = "bold 34px 'Plus Jakarta Sans', sans-serif";
+  g.fillText(ev.name, 40, 90);
+
+  g.font = "22px 'Plus Jakarta Sans', sans-serif";
+  const rows = [
+    ["HOLDER", st.holder || "Guest"],
+    ["VENUE", ev.venue],
+    ["DATE", ev.date + "  ·  Doors " + ev.time],
+    ["ZONE", ev.zone],
+  ];
+  rows.forEach((r, i) => {
+    const y = 160 + i * 48;
+    g.fillStyle = "#A5A1B8"; g.fillText(r[0], 40, y);
+    g.fillStyle = "#FFFFFF"; g.font = "bold 22px 'Plus Jakarta Sans', sans-serif";
+    g.fillText(r[1], 200, y);
+    g.font = "22px 'Plus Jakarta Sans', sans-serif";
+  });
+
+  // barcode block
+  g.fillStyle = "#FFFFFF"; g.fillRect(40, 380, W - 80, 130);
+  const { bars, total } = code39Bars(st.ticketId);
+  const scale = (W - 160) / total, bx = 80, by = 398, bh = 74;
+  g.fillStyle = "#080711";
+  bars.forEach(b => g.fillRect(bx + b.x * scale, by, Math.max(1, b.w * scale), bh));
+  g.font = "bold 20px monospace"; g.textAlign = "center";
+  g.fillText(st.ticketId, W / 2, 498);
+  g.textAlign = "left";
+  g.fillStyle = "#A5A1B8"; g.font = "16px 'Plus Jakarta Sans', sans-serif";
+  g.fillText("Present this barcode at the gate · beacongaze.com", 40, 540);
+  return c;
+}
+
+/* --- minimal hand-built PDF (single page, embedded JPEG) --- */
+function downloadPdfPass(){
+  const canvas = renderPassToCanvas();
+  const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+  const b64 = jpegDataUrl.split(",")[1];
+  const bin = atob(b64);
+  const img = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) img[i] = bin.charCodeAt(i);
+
+  const W = canvas.width * 0.5, H = canvas.height * 0.5; // points
+  const enc = new TextEncoder();
+  const parts = []; let offset = 0;
+  const offsets = [];
+  const push = chunk => {
+    const bytes = typeof chunk === "string" ? enc.encode(chunk) : chunk;
+    parts.push(bytes); offset += bytes.length;
+  };
+
+  push("%PDF-1.4\n");
+  offsets[1] = offset; push("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  offsets[2] = offset; push("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
+  offsets[3] = offset; push(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`);
+  offsets[4] = offset;
+  push(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.length} >>\nstream\n`);
+  push(img);
+  push("\nendstream\nendobj\n");
+  const content = `q ${W} 0 0 ${H} 0 0 cm /Im1 Do Q`;
+  offsets[5] = offset;
+  push(`5 0 obj\n<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`);
+
+  const xrefStart = offset;
+  let xref = "xref\n0 6\n0000000000 65535 f \n";
+  for (let i = 1; i <= 5; i++) xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  push(xref);
+  push(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`);
+
+  const blob = new Blob(parts, { type: "application/pdf" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = BG.get().ticketId + "-activation-pass.pdf";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("Activation Pass PDF downloaded.");
+}
+
+/* --- gate scan simulator --- */
+function scanGate(){
+  const card = $("pass-card");
+  const status = $("gate-status");
+  card.classList.remove("gate-flash"); void card.offsetWidth; card.classList.add("gate-flash");
+  status.classList.remove("hidden");
+  status.style.background = "rgba(52,211,153,.15)";
+  status.style.border = "1px solid #34d399";
+  status.style.color = "#34d399";
+  status.textContent = "✓ ACCESS GRANTED · " + BG.get().ticketId + " · " + new Date().toLocaleTimeString();
+  BG.set({ scanned: true });
+  clearTimeout(status._h);
+  status._h = setTimeout(() => {
+    status.style.background = "rgba(99,68,245,.12)";
+    status.style.border = "1px solid rgba(99,68,245,.4)";
+    status.style.color = "#9B86FF";
+    status.textContent = "Pass verified · ready for re-entry scan";
+  }, 2600);
+}
+
+/* ---------------------------- ambient dust canvas ---------------------------- */
+function startDust(){
+  const canvas = $("dust");
+  const ctx = canvas.getContext("2d");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, particles = [];
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    const count = Math.min(140, Math.floor(W * H / 14000));
+    particles = Array.from({length: count}, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.6 + .3,
+      vx: (Math.random() - .5) * .12, vy: (Math.random() - .5) * .12,
+      a: Math.random() * .5 + .15,
+      tw: Math.random() * Math.PI * 2
+    }));
+  }
+  function frame(t){
+    ctx.clearRect(0, 0, W, H);
+    for (const p of particles){
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      const twinkle = .6 + .4 * Math.sin(t / 1400 + p.tw);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(155,134,255,${(p.a * twinkle).toFixed(3)})`;
+      ctx.fill();
+    }
+    if (!reduced) requestAnimationFrame(frame);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+  requestAnimationFrame(frame); // draws once even under reduced motion
+}
+
+/* ---------------------------- wiring ---------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  buildCarousel();
+  buildEventList();
+  startDust();
+
+  // initial state
+  BG.set({ ticketId: newTicketId(EVENTS[0]) });
+
+  $("bc-generate").addEventListener("click", generateReading);
+  $("bc-date").addEventListener("keydown", e => { if (e.key === "Enter") generateReading(); });
+
+  $("pass-holder").addEventListener("input", e => BG.set({ holder: e.target.value.trim() }));
+
+  $("btn-scan").addEventListener("click", scanGate);
+  $("btn-pdf").addEventListener("click", downloadPdfPass);
+  $("btn-wallet").addEventListener("click", () =>
+    toast("Apple Wallet passes require server-side signing — this demo shows where your .pkpass hook connects."));
+
+  // reactive rendering
+  BG.subscribe((state, patch) => {
+    if ("activeSign" in patch){ renderArchetype(); renderHoroscope(); }
+    if ("activeEvent" in patch || "ticketId" in patch) renderPass();
+  });
+
+  renderArchetype();
+  renderHoroscope();
+  renderPass();
+});
+</script>
+</body>
+</html>
