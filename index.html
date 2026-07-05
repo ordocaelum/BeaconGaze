@@ -3,922 +3,1180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Beacon Gaze — Not a prediction. A direction.</title>
-<meta name="description" content="A personalized astrology reading — your chart, your archetype, your season ahead — delivered to your inbox in minutes. For entertainment and self-reflection.">
+<title>BeaconGaze — The Future of Personalized Spirituality</title>
+<meta name="description" content="An ultra-premium metaphysical house. Your natal sky, rendered as a cinematic descent through deep space. Precision astrology, quantum-grade insight, one unforgettable scroll.">
+<meta property="og:title" content="BeaconGaze — Your Sky, Written in Light">
+<meta property="og:description" content="A scroll-cinematic celestial platform where your astrological profile is the main character.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%238b6cf0' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23ff8a3c'/%3E%3Ccircle cx='50' cy='18' r='3' fill='%234fc3ff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-/* =====================================================================
-   TOKENS
-   ===================================================================== */
 :root{
-  --space:#080711;
-  --nebula:#131124;
-  --glow:#6344F5;
-  --glow-soft:rgba(99,68,245,.4);
-  --heading:#9B86FF;
-  --body:#A5A1B8;
-  --white:#FFFFFF;
-  --teal:#3ED6C0;
-  --ease-out:cubic-bezier(.22,.9,.32,1);
-  --ease-spring:cubic-bezier(.34,1.4,.44,1);
-  --dur-fast:.3s;
-  --dur-slow:.9s;
-  /* z-index layers */
-  --z-stars:0; --z-content:10; --z-nav:50; --z-toast:80;
+  --void:#050310;
+  --void-2:#0a0620;
+  --violet:#8b6cf0;
+  --violet-deep:#2a1b52;
+  --flare:#ff8a3c;
+  --pulsar:#4fc3ff;
+  --silver:#e9e6f4;
+  --silver-dim:rgba(233,230,244,.55);
+  --glass:rgba(20,14,48,.38);
+  --glass-line:rgba(233,230,244,.12);
+  --ease-lux:cubic-bezier(.22,1,.36,1);
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:var(--space);color:var(--body);
-  font-family:'Inter',system-ui,sans-serif;font-size:17px;line-height:1.65;
-  overflow-x:hidden;
-}
-h1,h2,h3,.display{font-family:'Orbitron',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--white);margin:0}
-p{margin:0}
-a{color:inherit}
-img,svg{display:block}
-::selection{background:rgba(99,68,245,.45);color:#fff}
-:focus-visible{outline:2px solid var(--heading);outline-offset:3px;border-radius:4px}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+html,body{background:var(--void);color:var(--silver);overflow-x:hidden}
+body{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:300;line-height:1.6;
+  -webkit-font-smoothing:antialiased;cursor:none}
+@media (pointer:coarse){body{cursor:auto}}
+::selection{background:var(--violet);color:var(--void)}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:.01em}
 
-/* layout helpers */
-.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
-.narrow{max-width:720px;margin:0 auto}
-section{position:relative;z-index:var(--z-content);padding:110px 0}
-.eyebrow{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--heading)}
-.h2{font-size:clamp(1.5rem,3.4vw,2.4rem);font-weight:700;margin-top:14px;line-height:1.25}
-.lede{margin-top:18px;font-size:1.05rem;max-width:640px}
+/* ---------- custom cursor ---------- */
+#cursor{position:fixed;top:0;left:0;width:10px;height:10px;border-radius:50%;
+  background:var(--silver);mix-blend-mode:difference;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%)}
+#cursor-halo{position:fixed;top:0;left:0;width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(233,230,244,.35);pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);transition:width .35s var(--ease-lux),height .35s var(--ease-lux),border-color .35s}
+body.cursor-active #cursor-halo{width:74px;height:74px;border-color:var(--flare)}
+@media (pointer:coarse){#cursor,#cursor-halo{display:none}}
 
-/* starfield canvas */
-#stars{position:fixed;inset:0;width:100%;height:100%;z-index:var(--z-stars);pointer-events:none}
+/* ---------- loader ---------- */
+#loader{position:fixed;inset:0;background:var(--void);z-index:9000;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:2.2rem;
+  transition:opacity 1.4s var(--ease-lux),visibility 1.4s}
+#loader.done{opacity:0;visibility:hidden}
+#loader .sigil{width:120px;height:120px;animation:sigilspin 14s linear infinite}
+@keyframes sigilspin{to{transform:rotate(360deg)}}
+#loader .word{font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,3vw,2rem);
+  letter-spacing:.55em;text-indent:.55em;color:var(--silver-dim);text-transform:uppercase;
+  animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.35}50%{opacity:.9}}
+#loader .bar{width:min(320px,60vw);height:1px;background:rgba(233,230,244,.12);overflow:hidden}
+#loader .bar i{display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--violet),var(--pulsar),var(--flare));
+  transition:width .4s ease}
 
-/* nav */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:var(--z-nav);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 28px;
-  background:rgba(8,7,17,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border-bottom:1px solid rgba(99,68,245,.18);
-  transition:background var(--dur-fast) ease;
-}
-.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1rem;letter-spacing:.14em;color:var(--white);text-decoration:none}
-.logo em{color:var(--heading);font-style:normal}
-.nav-cta{
-  font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;
-  background:linear-gradient(135deg,#6344F5,#8b5cf6);
-  box-shadow:0 0 15px var(--glow-soft);
-  transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) ease;
-}
-.nav-cta:hover{transform:scale(1.04);box-shadow:0 0 26px rgba(99,68,245,.6)}
+/* ---------- fixed layers ---------- */
+#cosmos{position:fixed;inset:0;z-index:0;pointer-events:none}
+#grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-/* buttons */
-.btn-primary{
-  display:inline-block;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:#fff;text-decoration:none;text-align:center;cursor:pointer;border:none;
-  padding:18px 38px;font-size:.9rem;border-radius:10px;
-  background:linear-gradient(135deg,#6344F5,#8b5cf6);
-  box-shadow:0 0 20px var(--glow-soft),inset 0 1px 0 rgba(255,255,255,.18);
-  transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur-fast) ease;
-}
-.btn-primary:hover{transform:scale(1.03) translateY(-1px);box-shadow:0 0 34px rgba(99,68,245,.65),inset 0 1px 0 rgba(255,255,255,.18)}
-.btn-primary:active{transform:scale(.99)}
-.btn-ghost{
-  display:inline-block;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--heading);text-decoration:none;cursor:pointer;text-align:center;
-  padding:16px 30px;font-size:.78rem;border-radius:10px;background:transparent;
-  border:1px solid rgba(99,68,245,.45);
-  transition:all var(--dur-fast) var(--ease-out);
-}
-.btn-ghost:hover{border-color:var(--heading);color:#fff;box-shadow:0 0 18px rgba(99,68,245,.35);transform:scale(1.02)}
+/* ---------- nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:800;display:flex;align-items:center;
+  justify-content:space-between;padding:1.4rem clamp(1.4rem,5vw,4rem);
+  backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+  background:linear-gradient(180deg,rgba(5,3,16,.72),rgba(5,3,16,.18));
+  border-bottom:1px solid var(--glass-line);
+  transform:translateY(-110%);transition:transform 1s var(--ease-lux)}
+nav.on{transform:translateY(0)}
+nav .mark{display:flex;align-items:center;gap:.7rem;font-family:'Cormorant Garamond',serif;
+  font-size:1.25rem;letter-spacing:.28em;text-transform:uppercase}
+nav .mark svg{width:26px;height:26px}
+nav ul{display:flex;gap:2.4rem;list-style:none;font-size:.72rem;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--silver-dim)}
+nav ul a{position:relative;padding:.3rem 0;transition:color .4s}
+nav ul a::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:0;
+  background:linear-gradient(90deg,var(--pulsar),var(--flare));transition:width .5s var(--ease-lux)}
+nav ul a:hover{color:var(--silver)}
+nav ul a:hover::after{width:100%}
+@media(max-width:860px){nav ul{display:none}}
+#hud-readout{font-size:.62rem;letter-spacing:.22em;color:var(--silver-dim);
+  text-transform:uppercase;font-variant-numeric:tabular-nums}
+#hud-readout b{color:var(--pulsar);font-weight:400}
 
-/* glass card */
-.glass{
-  background:rgba(19,17,36,.62);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(99,68,245,.25);border-radius:14px;
-  transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) ease,border-color var(--dur-fast) ease;
-}
+/* ---------- shared section chrome ---------- */
+section{position:relative;z-index:2}
+.chapter{min-height:100vh;display:flex;align-items:center;padding:clamp(5rem,12vh,9rem) clamp(1.4rem,6vw,6rem)}
+.eyebrow{font-size:.68rem;letter-spacing:.42em;text-transform:uppercase;color:var(--pulsar);
+  display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem}
+.eyebrow::before{content:"";width:42px;height:1px;background:linear-gradient(90deg,var(--pulsar),transparent)}
+.display{font-size:clamp(2.6rem,7vw,6.2rem);line-height:1.04;letter-spacing:.005em}
+.display .accent{font-style:italic;background:linear-gradient(110deg,var(--violet) 10%,var(--pulsar) 45%,var(--flare) 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{max-width:46ch;color:var(--silver-dim);font-size:clamp(.95rem,1.3vw,1.12rem);margin-top:1.8rem}
+.glass{background:var(--glass);border:1px solid var(--glass-line);border-radius:18px;
+  backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25);
+  box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(233,230,244,.08)}
+.split-line{display:block;overflow:hidden}
+.split-line span{display:block;transform:translateY(0)}
 
-/* =====================================================================
-   SCROLL REVEAL SYSTEM
-   float: drifts up 40px + fades over .9s
-   rise: subtler 24px lift
-   scale: grows from .94
-   children of [data-stagger] cascade with 120ms delays
-   ===================================================================== */
-[data-reveal]{opacity:0;transition:opacity var(--dur-slow) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
-[data-reveal="float"]{transform:translateY(40px)}
-[data-reveal="rise"]{transform:translateY(24px)}
-[data-reveal="scale"]{transform:scale(.94) translateY(16px)}
-[data-reveal].in{opacity:1;transform:none}
-[data-stagger]>*{opacity:0;transform:translateY(30px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out)}
-[data-stagger].in>*{opacity:1;transform:none}
-[data-stagger].in>*:nth-child(1){transition-delay:.05s}
-[data-stagger].in>*:nth-child(2){transition-delay:.17s}
-[data-stagger].in>*:nth-child(3){transition-delay:.29s}
-[data-stagger].in>*:nth-child(4){transition-delay:.41s}
+/* ---------- 1 · hero ---------- */
+#nexus{height:100vh;padding:0;position:relative;overflow:hidden}
+#hero-stage{position:absolute;inset:0}
+#hero-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity 1.6s ease;filter:saturate(1.12) contrast(1.05)}
+#hero-film.live{opacity:.92}
+#hero-veil{position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 50% 110%,rgba(5,3,16,.92) 0%,rgba(5,3,16,.35) 45%,rgba(5,3,16,.15) 70%),
+  linear-gradient(180deg,rgba(5,3,16,.55),transparent 30%,transparent 60%,rgba(5,3,16,.96))}
+#hero-copy{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:0 1.5rem;z-index:4}
+#hero-copy .house{font-size:.7rem;letter-spacing:.6em;text-indent:.6em;text-transform:uppercase;
+  color:var(--silver-dim);margin-bottom:2rem}
+#hero-copy h1{font-size:clamp(3rem,10vw,8.6rem);line-height:.98}
+#hero-copy .sub{margin-top:2.2rem;max-width:52ch;color:var(--silver-dim);font-size:clamp(.9rem,1.4vw,1.1rem)}
+#scroll-cue{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.8rem;z-index:4;
+  font-size:.62rem;letter-spacing:.4em;text-transform:uppercase;color:var(--silver-dim)}
+#scroll-cue .line{width:1px;height:56px;background:linear-gradient(180deg,var(--flare),transparent);
+  animation:cuefall 2.2s var(--ease-lux) infinite}
+@keyframes cuefall{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}
+  55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.cta-descent{margin-top:3rem;position:relative;display:inline-flex;align-items:center;gap:1rem;
+  padding:1.05rem 2.6rem;border-radius:100px;border:1px solid rgba(233,230,244,.28);
+  font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--silver);
+  background:rgba(10,6,32,.35);backdrop-filter:blur(10px);overflow:hidden;transition:border-color .5s}
+.cta-descent i{width:6px;height:6px;border-radius:50%;background:var(--flare);
+  box-shadow:0 0 12px var(--flare);animation:orbit-dot 3.4s linear infinite}
+@keyframes orbit-dot{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+.cta-descent:hover{border-color:var(--flare)}
+.cta-descent::before{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(60% 120% at 50% 120%,rgba(255,138,60,.25),transparent 70%);
+  opacity:0;transition:opacity .6s}
+.cta-descent:hover::before{opacity:1}
 
-/* =====================================================================
-   1 — HERO
-   ===================================================================== */
-#hero{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:140px 0 90px}
-.hero-tag{font-size:11px;letter-spacing:.4em}
-#hero h1{
-  font-size:clamp(2.1rem,6vw,4.2rem);font-weight:900;line-height:1.15;margin-top:22px;
-  text-shadow:0 0 40px rgba(99,68,245,.5);
-}
-#hero h1 .line{display:block;opacity:0;transform:translateY(26px);animation:heroline 1s var(--ease-out) forwards}
-#hero h1 .line:nth-child(2){animation-delay:.25s;color:var(--heading)}
-@keyframes heroline{to{opacity:1;transform:none}}
-.hero-sub{margin:26px auto 0;max-width:560px;font-size:1.08rem;opacity:0;animation:heroline 1s var(--ease-out) .55s forwards}
-.hero-cta-wrap{margin-top:40px;opacity:0;animation:heroline 1s var(--ease-out) .8s forwards}
-.hero-price-note{margin-top:14px;font-size:.85rem;opacity:.75}
-.hero-pulse{animation:heroline 1s var(--ease-out) .8s forwards,pulse 3.2s ease-in-out 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 20px var(--glow-soft)}50%{box-shadow:0 0 36px rgba(99,68,245,.7)}}
-.scroll-hint{margin-top:70px;opacity:0;animation:heroline 1s ease 1.4s forwards}
-.scroll-hint span{display:inline-block;animation:bob 2.4s ease-in-out infinite;color:var(--heading);font-size:1.3rem}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+/* ---------- 2 · blueprint ---------- */
+#blueprint .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:clamp(2.5rem,6vw,6rem);align-items:center;width:100%;max-width:1440px;margin:0 auto}
+@media(max-width:960px){#blueprint .grid{grid-template-columns:1fr}}
+#wheel-wrap{position:relative;aspect-ratio:1;max-width:640px;margin:0 auto;width:100%}
+#natal-wheel{width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(139,108,240,.25))}
+#wheel-glow{position:absolute;inset:-12%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(139,108,240,.16),rgba(79,195,255,.05) 55%,transparent 75%)}
+.birth-form{margin-top:2.4rem;padding:1.8rem;display:grid;gap:1rem}
+.birth-form .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:520px){.birth-form .row{grid-template-columns:1fr}}
+.field label{display:block;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--silver-dim);margin-bottom:.45rem}
+.field input,.field select{width:100%;background:rgba(5,3,16,.6);border:1px solid var(--glass-line);
+  border-radius:10px;padding:.75rem .9rem;color:var(--silver);font-family:inherit;font-size:.92rem;
+  outline:none;transition:border-color .4s;color-scheme:dark}
+.field input:focus,.field select:focus{border-color:var(--pulsar)}
+.cta-cast{position:relative;justify-self:start;margin-top:.4rem;background:none;border:none;
+  color:var(--silver);font-family:inherit;font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;
+  padding:.6rem 0;display:inline-flex;align-items:center;gap:.9rem}
+.cta-cast svg{width:30px;height:10px;overflow:visible}
+.cta-cast .fil{stroke:url(#filgrad);stroke-width:1.4;fill:none;stroke-dasharray:60;stroke-dashoffset:60;
+  transition:stroke-dashoffset .8s var(--ease-lux)}
+.cta-cast:hover .fil{stroke-dashoffset:0}
 
-/* =====================================================================
-   2 — WHAT IS BEACON GAZE (three floating columns)
-   ===================================================================== */
-.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:48px}
-.col-card{padding:34px 28px}
-.col-card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 20px rgba(99,68,245,.22);border-color:rgba(155,134,255,.5)}
-.col-card .glyph{font-size:1.9rem;color:var(--heading)}
-.col-card h3{font-size:.95rem;margin-top:16px;letter-spacing:.12em}
-.col-card p{margin-top:12px;font-size:.95rem}
-.col-card .price-tag{color:#fff;font-weight:700}
+/* ---------- 3 · alignments ---------- */
+#alignments{flex-direction:column;justify-content:center;overflow:hidden}
+#align-film-frame{position:absolute;inset:0;overflow:hidden;z-index:-1}
+#align-film-frame video,#align-film-frame canvas{width:100%;height:100%;object-fit:cover;opacity:.5;
+  filter:saturate(1.1)}
+#align-film-frame::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--void) 0%,rgba(5,3,16,.25) 30%,rgba(5,3,16,.25) 70%,var(--void) 100%)}
+.metric-band{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--glass-line);
+  border:1px solid var(--glass-line);border-radius:18px;overflow:hidden;max-width:1200px;
+  width:100%;margin:3.5rem auto 0}
+@media(max-width:860px){.metric-band{grid-template-columns:repeat(2,1fr)}}
+.metric{padding:2.2rem 1.8rem;background:rgba(8,5,24,.72);backdrop-filter:blur(16px)}
+.metric b{display:block;font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:clamp(2.2rem,4.5vw,3.6rem);line-height:1;font-variant-numeric:tabular-nums}
+.metric span{display:block;margin-top:.7rem;font-size:.62rem;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--silver-dim)}
+.metric:nth-child(1) b{color:var(--violet)}.metric:nth-child(2) b{color:var(--pulsar)}
+.metric:nth-child(3) b{color:var(--flare)}.metric:nth-child(4) b{color:var(--silver)}
 
-/* =====================================================================
-   3 — HOW IT WORKS (step reveal, connected beam)
-   ===================================================================== */
-.steps{position:relative;margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
-.steps::before{
-  content:"";position:absolute;top:44px;left:12%;right:12%;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(99,68,245,.7),transparent);
-  transform:scaleX(0);transform-origin:left;transition:transform 1.4s var(--ease-out) .3s;
-}
-.steps.in::before{transform:scaleX(1)}
-.step{text-align:center}
-.step .orb{
-  width:88px;height:88px;margin:0 auto;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(19,17,36,.85);border:1px solid rgba(99,68,245,.45);
-  box-shadow:0 0 18px rgba(99,68,245,.3);color:var(--heading);
-}
-.step h3{font-size:.85rem;margin-top:22px}
-.step p{margin-top:10px;font-size:.93rem;max-width:270px;margin-left:auto;margin-right:auto}
-.step small{display:block;margin-top:8px;font-size:.78rem;opacity:.6;letter-spacing:.2em;text-transform:uppercase}
+/* ---------- 4 · quantum ---------- */
+#quantum .stack{max-width:1440px;margin:0 auto;width:100%}
+.qgrid{display:grid;grid-template-columns:repeat(12,1fr);gap:1.4rem;margin-top:3.5rem}
+.qcard{grid-column:span 4;padding:2.2rem;position:relative;overflow:hidden;
+  transition:transform .6s var(--ease-lux),border-color .6s}
+.qcard:nth-child(2){grid-column:5/span 4;transform:translateY(2.4rem)}
+.qcard:nth-child(3){grid-column:9/span 4;transform:translateY(4.8rem)}
+@media(max-width:960px){.qcard,.qcard:nth-child(2),.qcard:nth-child(3){grid-column:span 12;transform:none}}
+.qcard:hover{border-color:rgba(79,195,255,.45)}
+.qcard .idx{font-size:.62rem;letter-spacing:.3em;color:var(--pulsar)}
+.qcard h3{font-size:1.9rem;margin:.9rem 0 .8rem}
+.qcard p{font-size:.9rem;color:var(--silver-dim)}
+.qcard::after{content:"";position:absolute;top:-40%;right:-40%;width:80%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,rgba(79,195,255,.14),transparent 65%);pointer-events:none}
 
-/* =====================================================================
-   4 — BLURRED PREVIEW
-   ===================================================================== */
-.preview-shell{position:relative;margin-top:52px;border-radius:16px;overflow:hidden;border:1px solid rgba(99,68,245,.35);box-shadow:0 0 40px rgba(99,68,245,.18)}
-.preview-doc{background:linear-gradient(180deg,#100e20,#0b0a17);padding:44px 40px;filter:blur(7px) saturate(1.1);transform:scale(1.02);user-select:none;pointer-events:none}
-.preview-doc h3{font-size:1.1rem;color:var(--heading)}
-.preview-doc .doc-row{display:flex;gap:28px;margin-top:26px;align-items:center}
-.preview-doc .sketch{
-  flex:0 0 180px;height:220px;border-radius:10px;border:1px solid rgba(155,134,255,.6);
-  background:radial-gradient(circle at 40% 30%,rgba(155,134,255,.35),rgba(19,17,36,.9));
-  display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(255,255,255,.8);
-}
-.preview-doc .doc-lines span{display:block;height:11px;border-radius:6px;background:rgba(165,161,184,.35);margin-bottom:12px}
-.preview-doc .doc-lines span:nth-child(1){width:90%}
-.preview-doc .doc-lines span:nth-child(2){width:75%}
-.preview-doc .doc-lines span:nth-child(3){width:83%}
-.preview-doc .doc-lines span:nth-child(4){width:60%}
-.preview-veil{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  background:linear-gradient(180deg,rgba(8,7,17,.15),rgba(8,7,17,.72) 70%);text-align:center;padding:24px;
-}
-.preview-veil .lock{font-size:1.8rem;color:var(--heading);text-shadow:0 0 18px rgba(99,68,245,.8)}
-.preview-veil p{color:#fff;font-weight:600;max-width:420px}
+/* ---------- 5 · journey ---------- */
+#journey{flex-direction:column;justify-content:center;text-align:center}
+#journey .steps{max-width:760px;margin:4rem auto 0;display:grid;gap:0;text-align:left}
+.step{display:grid;grid-template-columns:70px 1fr;gap:1.6rem;padding:2.2rem 0;
+  border-top:1px solid var(--glass-line)}
+.step:last-child{border-bottom:1px solid var(--glass-line)}
+.step .n{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-style:italic;
+  color:var(--flare);line-height:1}
+.step h3{font-size:1.5rem;margin-bottom:.4rem}
+.step p{font-size:.9rem;color:var(--silver-dim)}
 
-/* =====================================================================
-   5 — SOCIAL PROOF (constellation)
-   ===================================================================== */
-#proof{overflow:hidden}
-#constellation{position:absolute;inset:0;pointer-events:none;z-index:0}
-.quotes{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:52px}
-.quote{padding:30px 26px;position:relative}
-.quote::before{
-  content:"";position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;
-  transform:translateX(-50%);background:var(--heading);box-shadow:0 0 12px rgba(155,134,255,.9);
-}
-.quote .stars-row{color:#FFD66B;letter-spacing:3px;font-size:.9rem}
-.quote blockquote{margin:14px 0 0;font-style:italic;font-size:.95rem;color:#cfcbe4}
-.quote figcaption{margin-top:14px;font-size:.8rem;letter-spacing:.08em;color:var(--body)}
-.sample-badge{
-  position:absolute;top:14px;right:14px;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--heading);border:1px solid rgba(99,68,245,.45);border-radius:999px;padding:3px 10px;opacity:.85;
-}
-.proof-note{margin-top:26px;text-align:center;font-size:.85rem;opacity:.7}
+/* ---------- 6 · aura ---------- */
+#aura{flex-direction:column;justify-content:center;text-align:center;overflow:hidden}
+#aura-canvas-wrap{position:relative;width:min(560px,84vw);aspect-ratio:1;margin:3rem auto 0}
+#aura-canvas{width:100%;height:100%;border-radius:50%;
+  box-shadow:0 0 120px rgba(139,108,240,.3),0 0 260px rgba(79,195,255,.14)}
+#aura-legend{display:flex;gap:2.2rem;justify-content:center;flex-wrap:wrap;margin-top:2.6rem}
+#aura-legend .chip{display:flex;align-items:center;gap:.7rem;font-size:.68rem;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--silver-dim)}
+#aura-legend .chip i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 14px currentColor}
 
-/* =====================================================================
-   6 — REAL TALK (pure typography)
-   ===================================================================== */
-#realtalk{text-align:center;padding:150px 0}
-#realtalk .big{
-  font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.4rem,3.2vw,2.2rem);
-  line-height:1.55;color:#E8E5F5;letter-spacing:.01em;text-transform:none;max-width:820px;margin:34px auto 0;
-}
-#realtalk .big strong{color:var(--heading);font-weight:600}
-#realtalk .quiet{margin-top:38px;font-size:1rem;max-width:620px;margin-left:auto;margin-right:auto}
-.rt-rule{width:80px;height:1px;margin:44px auto 0;background:linear-gradient(90deg,transparent,var(--glow),transparent)}
+/* ---------- 7 · specifications ---------- */
+#specs .dossier{max-width:1100px;margin:0 auto;width:100%}
+#spec-table{width:100%;margin-top:3rem;border-collapse:collapse;font-size:.88rem}
+#spec-table th{font-size:.6rem;letter-spacing:.32em;text-transform:uppercase;color:var(--silver-dim);
+  font-weight:400;text-align:left;padding:0 1.2rem 1rem}
+#spec-table td{padding:1.05rem 1.2rem;border-top:1px solid var(--glass-line);
+  font-variant-numeric:tabular-nums}
+#spec-table td:first-child{font-family:'Cormorant Garamond',serif;font-size:1.15rem}
+#spec-table .glyph{color:var(--flare);margin-right:.6rem}
+#spec-table .deg{color:var(--pulsar)}
+#spec-table .house-col{color:var(--silver-dim)}
+@media(max-width:640px){#spec-table th:nth-child(4),#spec-table td:nth-child(4){display:none}}
 
-/* =====================================================================
-   7 — PRICING
-   ===================================================================== */
-.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;align-items:stretch}
-.tier{padding:38px 30px;display:flex;flex-direction:column;position:relative}
-.tier:hover{transform:translateY(-8px);box-shadow:0 16px 50px rgba(0,0,0,.5),0 0 28px rgba(99,68,245,.35);border-color:rgba(155,134,255,.6)}
-.tier.featured{border-color:rgba(155,134,255,.6);box-shadow:0 0 30px rgba(99,68,245,.28)}
-.tier .flag{
-  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
-  font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
-  background:linear-gradient(135deg,#6344F5,#8b5cf6);color:#fff;padding:5px 14px;border-radius:999px;white-space:nowrap;
-}
-.tier h3{font-size:.85rem}
-.tier .amount{font-family:'Orbitron',sans-serif;font-weight:900;color:#fff;font-size:2.3rem;margin-top:14px}
-.tier .amount small{font-size:.85rem;color:var(--body);font-weight:400;letter-spacing:.05em}
-.tier ul{list-style:none;margin:22px 0 30px;padding:0;flex:1}
-.tier li{padding:9px 0;font-size:.92rem;border-bottom:1px dashed rgba(99,68,245,.22);display:flex;gap:10px}
-.tier li::before{content:"✦";color:var(--heading);flex:0 0 auto}
-.tier li:last-child{border-bottom:none}
+/* ---------- 8 · destiny ---------- */
+#destiny{flex-direction:column;justify-content:center;text-align:center;min-height:110vh}
+#destiny .display{font-size:clamp(3rem,9vw,7.4rem)}
+.destiny-ctas{display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;margin-top:3.4rem}
+.tier-band{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1100px;margin:3.4rem auto 0;text-align:left}
+@media(max-width:900px){.tier-band{grid-template-columns:1fr;max-width:480px}}
+.tier{padding:2.4rem 2rem;display:flex;flex-direction:column;gap:1rem;position:relative}
+.tier h3{font-size:1.6rem}
+.tier b{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2.8rem;line-height:1;
+  background:linear-gradient(110deg,var(--silver),var(--pulsar));-webkit-background-clip:text;background-clip:text;color:transparent}
+.tier p{font-size:.86rem;color:var(--silver-dim);flex:1}
+.tier .cta-kit,.tier .cta-reserve{display:inline-block;text-align:center;padding:1rem 1.4rem}
+.tier-hot{border-color:rgba(255,138,60,.5);box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 44px rgba(255,138,60,.12),inset 0 1px 0 rgba(233,230,244,.08)}
+.tier-flag{position:absolute;top:-.7rem;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;color:var(--void);
+  background:linear-gradient(90deg,var(--flare),var(--violet));padding:.35rem 1rem;border-radius:100px}
+.cta-reserve{position:relative;padding:1.15rem 3rem;border-radius:14px;overflow:hidden;
+  font-size:.74rem;letter-spacing:.32em;text-transform:uppercase;color:var(--void);
+  background:var(--silver);border:none;font-family:inherit;transition:color .5s}
+.cta-reserve::before{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(140% 160% at 50% -30%,var(--flare),var(--violet) 70%);
+  transform:translateY(101%);transition:transform .65s var(--ease-lux)}
+.cta-reserve:hover::before{transform:translateY(0)}
+.cta-reserve:hover{color:var(--silver)}
+.cta-reserve span{position:relative;z-index:1}
+.cta-kit{position:relative;padding:1.15rem 3rem;border-radius:14px;background:transparent;
+  color:var(--silver);font-family:inherit;font-size:.74rem;letter-spacing:.32em;text-transform:uppercase;
+  border:1px solid rgba(233,230,244,.3);transition:box-shadow .5s,border-color .5s}
+.cta-kit:hover{border-color:var(--pulsar);box-shadow:0 0 0 1px var(--pulsar),0 0 34px rgba(79,195,255,.25)}
+footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:flex;
+  justify-content:space-between;gap:1.5rem;flex-wrap:wrap;font-size:.64rem;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--silver-dim);border-top:1px solid var(--glass-line)}
 
-/* =====================================================================
-   8 — NEWSLETTER
-   ===================================================================== */
-#newsletter{text-align:center}
-.nl-form{margin:40px auto 0;max-width:560px;display:flex;flex-direction:column;gap:14px}
-.nl-form input{
-  background:rgba(19,17,36,.7);border:1px solid rgba(99,68,245,.35);border-radius:10px;
-  color:#fff;padding:16px 20px;font-size:1rem;font-family:'Inter',sans-serif;width:100%;
-  transition:border-color var(--dur-fast) ease,box-shadow var(--dur-fast) ease;
-}
-.nl-form input::placeholder{color:#5e5a75}
-.nl-form input:focus{border-color:var(--glow);box-shadow:0 0 16px rgba(99,68,245,.35);outline:none}
-.nl-note{margin-top:16px;font-size:.8rem;opacity:.65}
-
-/* =====================================================================
-   9 — FAQ
-   ===================================================================== */
-.faq-list{margin-top:48px;display:flex;flex-direction:column;gap:14px}
-.faq{overflow:hidden}
-.faq button{
-  all:unset;display:flex;justify-content:space-between;align-items:center;gap:16px;
-  width:100%;padding:22px 26px;cursor:pointer;color:#fff;font-weight:600;font-size:1rem;box-sizing:border-box;
-}
-.faq button .chev{color:var(--heading);transition:transform .45s var(--ease-out);flex:0 0 auto}
-.faq.open button .chev{transform:rotate(180deg)}
-.faq .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease-out)}
-.faq.open .body{grid-template-rows:1fr}
-.faq .body>div{overflow:hidden}
-.faq .body p{padding:0 26px 24px;font-size:.95rem}
-
-/* =====================================================================
-   10 — FOOTER (stars fade to near-black)
-   ===================================================================== */
-footer{
-  position:relative;z-index:var(--z-content);text-align:center;padding:120px 24px 60px;
-  background:linear-gradient(180deg,rgba(8,7,17,0),rgba(3,3,8,.92) 55%,#030308);
-}
-.foot-tag{
-  font-family:'Orbitron',sans-serif;letter-spacing:.28em;font-size:.8rem;color:var(--heading);
-  text-shadow:0 0 22px rgba(99,68,245,.75);animation:tagglow 4s ease-in-out infinite;
-}
-@keyframes tagglow{0%,100%{text-shadow:0 0 14px rgba(99,68,245,.55)}50%{text-shadow:0 0 30px rgba(155,134,255,.9)}}
-.foot-links{margin-top:34px;display:flex;justify-content:center;gap:28px;flex-wrap:wrap;font-size:.85rem}
-.foot-links a{text-decoration:none;color:var(--body);transition:color var(--dur-fast) ease}
-.foot-links a:hover{color:#fff}
-.foot-social{margin-top:22px;display:flex;justify-content:center;gap:18px}
-.foot-social a{color:var(--body);transition:color var(--dur-fast) ease,transform var(--dur-fast) var(--ease-out)}
-.foot-social a:hover{color:var(--heading);transform:translateY(-3px)}
-.foot-legal{margin-top:36px;font-size:.78rem;opacity:.55;max-width:640px;margin-left:auto;margin-right:auto;font-style:italic}
-
-.toast{
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);
-  z-index:var(--z-toast);background:var(--nebula);border:1px solid rgba(99,68,245,.5);
-  color:#fff;padding:13px 22px;border-radius:10px;font-size:.9rem;
-  opacity:0;pointer-events:none;transition:all var(--dur-fast) ease;max-width:90vw;text-align:center;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* =====================================================================
-   MOBILE
-   ===================================================================== */
-@media (max-width:860px){
-  section{padding:80px 0}
-  .cols3,.steps,.quotes,.tiers{grid-template-columns:1fr}
-  .steps::before{display:none}
-  .preview-doc .doc-row{flex-direction:column}
-  .preview-doc .sketch{flex-basis:auto;width:160px}
-  #realtalk{padding:110px 0}
-  .tier.featured{order:-1}
-}
-@media (min-width:641px){
-  .nl-form{flex-direction:row}
-  .nl-form input{flex:1}
-}
-
-/* =====================================================================
-   REDUCED MOTION
-   ===================================================================== */
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-  html{scroll-behavior:auto}
-  [data-reveal],[data-stagger]>*{opacity:1!important;transform:none!important}
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important}
+  body{cursor:auto}
+  #cursor,#cursor-halo{display:none}
 }
 </style>
 </head>
 <body>
+<div id="cursor"></div><div id="cursor-halo"></div>
 
-<canvas id="stars" aria-hidden="true"></canvas>
+<div id="loader" role="status" aria-label="Loading BeaconGaze">
+  <svg class="sigil" viewBox="0 0 120 120" fill="none">
+    <circle cx="60" cy="60" r="52" stroke="#8b6cf0" stroke-width="1" opacity=".7"/>
+    <circle cx="60" cy="60" r="38" stroke="#4fc3ff" stroke-width=".8" stroke-dasharray="4 7"/>
+    <circle cx="60" cy="60" r="7" fill="#ff8a3c"/>
+    <circle cx="60" cy="8" r="3" fill="#e9e6f4"/>
+    <path d="M60 22 L94 78 L26 78 Z" stroke="#e9e6f4" stroke-width=".6" opacity=".5"/>
+  </svg>
+  <div class="word">BeaconGaze</div>
+  <div class="bar"><i id="loadbar"></i></div>
+</div>
 
-<nav aria-label="Main">
-  <a class="logo" href="#hero">BEACON<em>GAZE</em></a>
-  <a class="nav-cta" href="#pricing">Get Your Reading</a>
+<canvas id="cosmos" aria-hidden="true"></canvas>
+<div id="grain" aria-hidden="true"></div>
+
+<nav id="topnav" aria-label="Primary">
+  <a class="mark" href="#nexus">
+    <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="28" stroke="#8b6cf0" stroke-width="3"/><circle cx="32" cy="32" r="6" fill="#ff8a3c"/><circle cx="50" cy="18" r="3" fill="#4fc3ff"/></svg>
+    BeaconGaze
+  </a>
+  <ul>
+    <li><a href="#blueprint">Blueprint</a></li>
+    <li><a href="#alignments">Alignments</a></li>
+    <li><a href="#quantum">Intellect</a></li>
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#aura">Aura</a></li>
+    <li><a href="#specs">Specifications</a></li>
+    <li><a href="#destiny">Destiny</a></li>
+  </ul>
+  <div id="hud-readout">Depth <b id="hud-depth">0.000</b> AU</div>
 </nav>
 
-<!-- ============ 1 · HERO ============ -->
-<section id="hero">
-  <div class="wrap">
-    <p class="eyebrow hero-tag">✦ Personalized astrology readings ✦</p>
-    <h1>
-      <span class="line">Not a prediction.</span>
-      <span class="line">A direction.</span>
-    </h1>
-    <p class="hero-sub">
-      Beacon Gaze turns your birth chart into a beautifully written reading —
-      your archetype, your elemental balance, your season ahead — delivered to your inbox in minutes.
-    </p>
-    <div class="hero-cta-wrap hero-pulse" style="display:inline-block;border-radius:10px">
-      <a class="btn-primary" href="#pricing" data-checkout="basic">Get Your Reading — $14.99</a>
-    </div>
-    <p class="hero-price-note">Instant digital delivery · For entertainment &amp; self-reflection</p>
-    <div class="scroll-hint"><span aria-hidden="true">▾</span></div>
+<!-- 1 · THE COSMIC NEXUS -->
+<section id="nexus" aria-label="The Cosmic Nexus">
+  <div id="hero-stage">
+    <video id="hero-film" muted playsinline preload="auto" crossorigin="anonymous"></video>
+    <div id="hero-veil"></div>
   </div>
+  <div id="hero-copy">
+    <div class="house">The Metaphysical House of Precision</div>
+    <h1><span class="split-line"><span>Your sky,</span></span>
+        <span class="split-line"><span class="accent">written in light.</span></span></h1>
+    <p class="sub">A cinematic descent through the exact heavens of the moment you were born.
+      Scroll, and the universe rewinds to you.</p>
+    <a class="cta-descent" href="#blueprint"><i></i>Begin the Descent</a>
+  </div>
+  <div id="scroll-cue"><span>Scroll to travel</span><span class="line"></span></div>
 </section>
 
-<!-- ============ 2 · WHAT IS BEACON GAZE ============ -->
-<section id="what">
-  <div class="wrap">
-    <div data-reveal="float">
-      <p class="eyebrow">The signal</p>
-      <h2 class="h2">What is Beacon Gaze?</h2>
-    </div>
-    <div class="cols3" data-stagger>
-      <div class="glass col-card">
-        <div class="glyph" aria-hidden="true">☉</div>
-        <h3>What it is</h3>
-        <p>A written astrology reading built from your exact birth details — sun sign, moon phase, element balance, and the archetype that runs through all of it. Crafted, not copy-pasted.</p>
-      </div>
-      <div class="glass col-card">
-        <div class="glyph" aria-hidden="true">✧</div>
-        <h3>What you get</h3>
-        <p>A multi-page reading in your inbox: your chart wheel, your archetype profile with original artwork, and a forecast for the season ahead — written to reflect, never to scare.</p>
-      </div>
-      <div class="glass col-card">
-        <div class="glyph" aria-hidden="true">◈</div>
-        <h3>What it costs</h3>
-        <p><span class="price-tag">From $14.99.</span> One-time. No subscription, no upsell funnel mid-reading, no "call this number." Pick a tier, get your reading, that's the whole deal.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 3 · HOW IT WORKS ============ -->
-<section id="how">
-  <div class="wrap">
-    <div data-reveal="float">
-      <p class="eyebrow">Three steps</p>
-      <h2 class="h2">How it works</h2>
-    </div>
-    <div class="steps" data-stagger data-reveal-extra>
-      <div class="step">
-        <div class="orb">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
+<!-- 2 · THE BLUEPRINT -->
+<section id="blueprint" class="chapter" aria-label="The Blueprint">
+  <div class="grid">
+    <div>
+      <div class="eyebrow">02 · The Blueprint</div>
+      <h2 class="display">The geometry <span class="accent">you arrived with.</span></h2>
+      <p class="lede">Enter the coordinates of your first breath. The instrument beside you is not
+        an illustration — it is your natal wheel, computed live from planetary ephemerides and
+        rendered as the centerpiece of everything that follows.</p>
+      <form class="birth-form glass" id="birth-form" autocomplete="off">
+        <div class="row">
+          <div class="field"><label for="bf-name">Name or sigil</label>
+            <input id="bf-name" type="text" placeholder="Orion V." maxlength="40"></div>
+          <div class="field"><label for="bf-date">Birth date</label>
+            <input id="bf-date" type="date" value="1994-08-17" required></div>
         </div>
-        <h3>Fill out your profile</h3>
-        <p>Birth date, time if you know it, and place. Two minutes, start to finish.</p>
-        <small>Step 01</small>
-      </div>
-      <div class="step">
-        <div class="orb">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+        <div class="row">
+          <div class="field"><label for="bf-time">Local time</label>
+            <input id="bf-time" type="time" value="04:44" required></div>
+          <div class="field"><label for="bf-tz">UTC offset at birth</label>
+            <select id="bf-tz"></select></div>
         </div>
-        <h3>We generate your blueprint</h3>
-        <p>Your chart is computed and your reading is composed around your archetype.</p>
-        <small>Step 02</small>
-      </div>
-      <div class="step">
-        <div class="orb">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+        <div class="row">
+          <div class="field"><label for="bf-lat">Latitude °</label>
+            <input id="bf-lat" type="number" step="0.0001" min="-89.9" max="89.9" value="40.7128"></div>
+          <div class="field"><label for="bf-lon">Longitude ° (east +)</label>
+            <input id="bf-lon" type="number" step="0.0001" min="-180" max="180" value="-74.0060"></div>
         </div>
-        <h3>Your reading arrives</h3>
-        <p>Delivered to your inbox within minutes, yours to keep forever.</p>
-        <small>Step 03</small>
+        <button class="cta-cast" type="submit">Cast My Chart
+          <svg viewBox="0 0 30 10"><defs><linearGradient id="filgrad" x1="0" x2="1">
+            <stop offset="0" stop-color="#4fc3ff"/><stop offset="1" stop-color="#ff8a3c"/></linearGradient></defs>
+            <path class="fil" d="M0 5 Q 8 0 15 5 T 30 5"/></svg>
+        </button>
+      </form>
+    </div>
+    <div id="wheel-wrap">
+      <div id="wheel-glow"></div>
+      <svg id="natal-wheel" viewBox="0 0 600 600" role="img" aria-label="Live natal wheel"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · ORBITAL ALIGNMENTS -->
+<section id="alignments" class="chapter" aria-label="Orbital Alignments">
+  <div id="align-film-frame"><canvas id="align-canvas" aria-hidden="true"></canvas></div>
+  <div style="max-width:1200px;margin:0 auto;width:100%">
+    <div class="eyebrow">03 · Orbital Alignments</div>
+    <h2 class="display">Transits, measured like <span class="accent">telemetry.</span></h2>
+    <p class="lede">Every progression and return is tracked against your blueprint in real time —
+      the sky as a live instrument panel, updated to this very second.</p>
+    <div class="metric-band glass">
+      <div class="metric"><b id="m-sun">—</b><span>Sun · current longitude</span></div>
+      <div class="metric"><b id="m-moon">—</b><span>Moon · current longitude</span></div>
+      <div class="metric"><b id="m-phase">—</b><span>Lunar phase</span></div>
+      <div class="metric"><b id="m-next">—</b><span>Days to your solar return</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · QUANTUM INTELLECT -->
+<section id="quantum" class="chapter" aria-label="Quantum Intellect">
+  <div class="stack">
+    <div class="eyebrow">04 · Quantum Intellect</div>
+    <h2 class="display">Ancient charts, <span class="accent">machine-grade rigor.</span></h2>
+    <p class="lede">Beneath the mysticism runs an engine: astronomical algorithms, pattern models,
+      and a reading pipeline refined like an optical instrument.</p>
+    <div class="qgrid">
+      <div class="qcard glass">
+        <div class="idx">ENGINE / 01</div>
+        <h3>Ephemeris Core</h3>
+        <p>Planetary longitudes derived from Keplerian orbital elements and lunar series expansions —
+          the same mathematics observatories use, running silently in your browser.</p>
+      </div>
+      <div class="qcard glass">
+        <div class="idx">ENGINE / 02</div>
+        <h3>Aspect Lattice</h3>
+        <p>Conjunctions, trines, squares and oppositions resolved to the arc-minute, then woven
+          into a lattice of filaments across your wheel — precision you can watch draw itself.</p>
+      </div>
+      <div class="qcard glass">
+        <div class="idx">ENGINE / 03</div>
+        <h3>Predictive Insight</h3>
+        <p>Transit windows scored and ranked, so a reading arrives as foresight with coordinates —
+          not vague weather, but a calendar of gravity.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ 4 · BLURRED PREVIEW ============ -->
-<section id="preview">
-  <div class="wrap">
-    <div data-reveal="float">
-      <p class="eyebrow">A glimpse</p>
-      <h2 class="h2">Inside a reading</h2>
-      <p class="lede">Every reading is composed for one chart only. Here's the shape of what lands in your inbox — the full version is yours to unlock.</p>
-    </div>
-    <div class="preview-shell" data-reveal="scale">
-      <div class="preview-doc" aria-hidden="true">
-        <h3>YOUR COSMIC BLUEPRINT · SCORPIO SUN</h3>
-        <div class="doc-row">
-          <div class="sketch">♏</div>
-          <div class="doc-lines" style="flex:1">
-            <span></span><span></span><span></span><span></span>
-          </div>
-        </div>
-        <div class="doc-row">
-          <div class="doc-lines" style="flex:1">
-            <span></span><span></span><span></span>
-          </div>
-          <div class="sketch" style="height:150px;flex-basis:150px">☾</div>
-        </div>
-      </div>
-      <div class="preview-veil">
-        <div class="lock" aria-hidden="true">✦</div>
-        <p>Your archetype artwork, your chart wheel, and a season-ahead forecast — written for your birth details alone.</p>
-        <a class="btn-primary" href="#pricing">Unlock your full reading</a>
-      </div>
+<!-- 5 · THE INNER JOURNEY -->
+<section id="journey" class="chapter" aria-label="The Inner Journey">
+  <div style="width:100%">
+    <div class="eyebrow" style="justify-content:center">05 · The Inner Journey</div>
+    <h2 class="display">The reading, <span class="accent">as a rite.</span></h2>
+    <div class="steps">
+      <div class="step"><div class="n">I</div><div><h3>The Casting</h3>
+        <p>Your chart is computed, verified, and set — the fixed sky against which everything is read.</p></div></div>
+      <div class="step"><div class="n">II</div><div><h3>The Descent</h3>
+        <p>A guided passage through houses and aspects, narrated like a film only you can watch.</p></div></div>
+      <div class="step"><div class="n">III</div><div><h3>The Return</h3>
+        <p>You leave with a dossier: your spectrum, your timings, and the language of your own sky.</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ============ 5 · SOCIAL PROOF ============ -->
-<section id="proof">
-  <canvas id="constellation" aria-hidden="true"></canvas>
-  <div class="wrap">
-    <div data-reveal="float" style="text-align:center">
-      <p class="eyebrow">Early signals</p>
-      <h2 class="h2">Join the first wave of readers</h2>
-    </div>
-    <div class="quotes" data-stagger>
-      <figure class="glass quote">
-        <span class="sample-badge">Sample</span>
-        <div class="stars-row" aria-label="5 out of 5 stars">★★★★★</div>
-        <blockquote>"It read like it was written about me, not at me. I've kept it in my saved folder ever since."</blockquote>
-        <figcaption>— Example review · replaced with verified quotes as they arrive</figcaption>
-      </figure>
-      <figure class="glass quote">
-        <span class="sample-badge">Sample</span>
-        <div class="stars-row" aria-label="5 out of 5 stars">★★★★★</div>
-        <blockquote>"The archetype artwork alone was worth it. The forecast gave me language for a season I was already feeling."</blockquote>
-        <figcaption>— Example review · replaced with verified quotes as they arrive</figcaption>
-      </figure>
-      <figure class="glass quote">
-        <span class="sample-badge">Sample</span>
-        <div class="stars-row" aria-label="5 out of 5 stars">★★★★★</div>
-        <blockquote>"No doom, no fear-bait, no 'act now.' Just a genuinely beautiful piece of writing about my chart."</blockquote>
-        <figcaption>— Example review · replaced with verified quotes as they arrive</figcaption>
-      </figure>
-    </div>
-    <p class="proof-note" data-reveal="rise">Beacon Gaze is newly launched — the quotes above are illustrative samples and will be swapped for real, verified reader reviews as they come in. We'd rather show you honest placeholders than invented praise.</p>
-  </div>
-</section>
-
-<!-- ============ 6 · REAL TALK ============ -->
-<section id="realtalk">
-  <div class="wrap narrow">
-    <p class="eyebrow" data-reveal="rise">Real talk</p>
-    <p class="big" data-reveal="float">
-      Astrology can't tell you your future. <strong>Nobody can.</strong>
-      What a great reading does is hand you a mirror — a language of archetypes
-      old enough and rich enough to help you see your own patterns clearly.
-      That's the whole product. <strong>A direction, not a destiny.</strong>
-    </p>
-    <div class="rt-rule" data-reveal="rise"></div>
-    <p class="quiet" data-reveal="rise">
-      So here's our promise: no fear tactics, no fake urgency, no claims that the stars have
-      decided anything for you. Every reading is for entertainment and self-reflection.
-      If you're navigating something heavy — health, money, a relationship on the edge —
-      a reading can keep you company, but a professional should keep you counsel.
-    </p>
-  </div>
-</section>
-
-<!-- ============ 7 · PRICING ============ -->
-<section id="pricing">
-  <div class="wrap">
-    <div data-reveal="float" style="text-align:center">
-      <p class="eyebrow">One-time · No subscription</p>
-      <h2 class="h2">Choose your reading</h2>
-    </div>
-    <div class="tiers" data-stagger>
-      <div class="glass tier">
-        <h3>Basic Reading</h3>
-        <div class="amount">$14.99 <small>one-time</small></div>
-        <ul>
-          <li>Sun sign &amp; moon phase reading</li>
-          <li>Your core archetype profile</li>
-          <li>Elemental balance breakdown</li>
-          <li>Delivered by email in minutes</li>
-        </ul>
-        <button class="btn-primary" data-checkout="basic">Get Basic — $14.99</button>
-      </div>
-      <div class="glass tier featured">
-        <span class="flag">Most chosen</span>
-        <h3>Full Report</h3>
-        <div class="amount">$24.99 <small>one-time</small></div>
-        <ul>
-          <li>Everything in Basic</li>
-          <li>Season-ahead forecast (3 months)</li>
-          <li>Compatibility overview by element</li>
-          <li>Printable chart wheel (PDF)</li>
-        </ul>
-        <button class="btn-primary" data-checkout="full">Get Full — $24.99</button>
-      </div>
-      <div class="glass tier">
-        <h3>Premium Blueprint</h3>
-        <div class="amount">$49.99 <small>one-time</small></div>
-        <ul>
-          <li>Everything in Full Report</li>
-          <li>Original archetype artwork of your sign</li>
-          <li>12-month cosmic forecast</li>
-          <li>Priority delivery &amp; keepsake PDF edition</li>
-        </ul>
-        <button class="btn-primary" data-checkout="premium">Get Premium — $49.99</button>
-      </div>
+<!-- 6 · AURA & SPECTRUM -->
+<section id="aura" class="chapter" aria-label="Aura and Spectrum Showcase">
+  <div style="width:100%">
+    <div class="eyebrow" style="justify-content:center">06 · Aura &amp; Spectrum</div>
+    <h2 class="display">Your personal <span class="accent">color of gravity.</span></h2>
+    <p class="lede" style="margin-inline:auto;text-align:center">The elemental balance of your chart,
+      rendered as a living iridescent field — fire to flare, water to pulsar, air to silver,
+      earth to deep violet.</p>
+    <div id="aura-canvas-wrap"><canvas id="aura-canvas" width="900" height="900"></canvas></div>
+    <div id="aura-legend">
+      <div class="chip" style="color:#ff8a3c"><i style="background:#ff8a3c"></i><span id="el-fire">Fire —</span></div>
+      <div class="chip" style="color:#4fc3ff"><i style="background:#4fc3ff"></i><span id="el-water">Water —</span></div>
+      <div class="chip" style="color:#e9e6f4"><i style="background:#e9e6f4"></i><span id="el-air">Air —</span></div>
+      <div class="chip" style="color:#8b6cf0"><i style="background:#8b6cf0"></i><span id="el-earth">Earth —</span></div>
     </div>
   </div>
 </section>
 
-<!-- ============ 8 · NEWSLETTER ============ -->
-<section id="newsletter">
-  <div class="wrap narrow">
-    <div data-reveal="float">
-      <p class="eyebrow">An open invitation</p>
-      <h2 class="h2">Your free weekly cosmic forecast</h2>
-      <p class="lede" style="margin-left:auto;margin-right:auto">One short, well-written email every Sunday. The week's sky, one reflection prompt, zero spam.</p>
-    </div>
-    <form class="nl-form" id="nl-form" data-reveal="rise" novalidate>
-      <input type="text" id="nl-name" name="FIRSTNAME" placeholder="First name" autocomplete="given-name" aria-label="First name">
-      <input type="email" id="nl-email" name="EMAIL" placeholder="you@example.com" autocomplete="email" required aria-label="Email address">
-      <button class="btn-primary" type="submit" style="padding:16px 26px;font-size:.78rem">Join free</button>
-    </form>
-    <p class="nl-note" data-reveal="rise">Unsubscribe anytime with one click. We never sell or share your email.</p>
+<!-- 7 · CELESTIAL SPECIFICATIONS -->
+<section id="specs" class="chapter" aria-label="Celestial Specifications">
+  <div class="dossier">
+    <div class="eyebrow">07 · Celestial Specifications</div>
+    <h2 class="display">The dossier of <span class="accent" id="spec-name">your sky.</span></h2>
+    <table id="spec-table" aria-live="polite">
+      <thead><tr><th>Body</th><th>Sign</th><th>Longitude</th><th>House</th></tr></thead>
+      <tbody id="spec-body"></tbody>
+    </table>
+    <p class="lede" id="aspect-summary" style="max-width:70ch"></p>
   </div>
 </section>
 
-<!-- ============ 9 · FAQ ============ -->
-<section id="faq">
-  <div class="wrap narrow">
-    <div data-reveal="float" style="text-align:center">
-      <p class="eyebrow">Before you ask</p>
-      <h2 class="h2">Questions, answered straight</h2>
-    </div>
-    <div class="faq-list" data-reveal="rise">
-      <div class="glass faq">
-        <button aria-expanded="false"><span>Is this real astrology?</span><span class="chev" aria-hidden="true">▾</span></button>
-        <div class="body"><div><p>Yes and no, honestly. Your chart data — sun sign, moon phase, elements, modalities — is computed from your real birth details using the traditional Western astrology framework. But astrology isn't science and we won't pretend it is: readings are for entertainment and self-reflection, and we write them as a mirror for thinking, never as predictions or advice.</p></div></div>
+<!-- 8 · CLAIM YOUR DESTINY -->
+<section id="destiny" class="chapter" aria-label="Claim Your Destiny">
+  <div style="width:100%">
+    <div class="eyebrow" style="justify-content:center">08 · Claim Your Destiny</div>
+    <h2 class="display">The sky has been waiting.<br><span class="accent">Answer it.</span></h2>
+    <p class="lede" style="margin-inline:auto;text-align:center">One-time readings, no subscription.
+      Cast, written, and delivered to your inbox — each tier a deeper descent into your sky.</p>
+    <div class="tier-band">
+      <div class="tier glass">
+        <h3>Basic Reading</h3><b>$14.99</b>
+        <p>Sun sign &amp; moon phase reading · core archetype profile · elemental balance · delivered by email in minutes.</p>
+        <a class="cta-kit" href="mailto:hello@beacongaze.com?subject=Basic%20Reading%20—%20%2414.99">Get Basic</a>
       </div>
-      <div class="glass faq">
-        <button aria-expanded="false"><span>Is my data safe?</span><span class="chev" aria-hidden="true">▾</span></button>
-        <div class="body"><div><p>Your birth details and email are used for exactly one thing: generating and delivering your reading (plus the newsletter, if you opt in). We don't sell your data, we don't share it with advertisers, and you can request deletion anytime via the contact link below. Full details live in our Privacy Policy.</p></div></div>
+      <div class="tier glass tier-hot">
+        <div class="tier-flag">Most chosen</div>
+        <h3>Full Report</h3><b>$24.99</b>
+        <p>Everything in Basic · season-ahead forecast (3 months) · compatibility by element · printable chart wheel PDF.</p>
+        <a class="cta-reserve" href="mailto:hello@beacongaze.com?subject=Full%20Report%20—%20%2424.99"><span>Get Full Report</span></a>
       </div>
-      <div class="glass faq">
-        <button aria-expanded="false"><span>What do I actually receive?</span><span class="chev" aria-hidden="true">▾</span></button>
-        <div class="body"><div><p>A written digital reading delivered by email: your chart wheel, your archetype profile, and — depending on tier — a seasonal or 12-month forecast, compatibility overview, and original archetype artwork as a keepsake PDF. It's a piece of personalized writing and art, not a physical product and not a promise about your future.</p></div></div>
-      </div>
-      <div class="glass faq">
-        <button aria-expanded="false"><span>How long does it take?</span><span class="chev" aria-hidden="true">▾</span></button>
-        <div class="body"><div><p>Most readings arrive within minutes of checkout. Premium Blueprints with custom artwork can take up to 24 hours. If yours hasn't landed, check spam first, then email us — we'll re-send it right away.</p></div></div>
-      </div>
-      <div class="glass faq">
-        <button aria-expanded="false"><span>What's the refund policy?</span><span class="chev" aria-hidden="true">▾</span></button>
-        <div class="body"><div><p>If your reading isn't what you hoped for, email us within 7 days of purchase and we'll refund you in full — no forms, no interrogation. We'd rather lose $14.99 than keep an unhappy reader.</p></div></div>
+      <div class="tier glass">
+        <h3>Premium Blueprint</h3><b>$49.99</b>
+        <p>Everything in Full · original archetype artwork · 12-month cosmic forecast · priority delivery &amp; keepsake PDF.</p>
+        <a class="cta-kit" href="mailto:hello@beacongaze.com?subject=Premium%20Blueprint%20—%20%2449.99">Get Premium</a>
       </div>
     </div>
+    <p class="lede" style="margin-inline:auto;text-align:center;margin-top:3rem;font-size:.85rem">
+      Or begin with the free weekly forecast — one short, well-written email every Sunday.
+      <a href="mailto:hello@beacongaze.com?subject=Join%20the%20weekly%20forecast" style="color:var(--pulsar)">Join free.</a></p>
   </div>
 </section>
 
-<!-- ============ 10 · FOOTER ============ -->
 <footer>
-  <a class="logo" href="#hero">BEACON<em>GAZE</em></a>
-  <p class="foot-tag" style="margin-top:26px">Not a prediction. A direction.</p>
-  <div class="foot-links">
-    <a href="/privacy.html">Privacy Policy</a>
-    <a href="/terms.html">Terms</a>
-    <a href="mailto:hello@beacongaze.com">Contact</a>
-  </div>
-  <div class="foot-social" aria-label="Social links">
-    <a href="https://www.tiktok.com/" aria-label="TikTok" rel="noopener" target="_blank">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.78.12V9.77a5.76 5.76 0 0 0-.78-.06 5.69 5.69 0 1 0 5.69 5.69V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.25-1.48z"/></svg>
-    </a>
-    <a href="https://www.instagram.com/" aria-label="Instagram" rel="noopener" target="_blank">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>
-    </a>
-    <a href="https://www.pinterest.com/" aria-label="Pinterest" rel="noopener" target="_blank">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.64 19.31c-.05-.8-.1-2.03.02-2.9l1.17-4.95s-.3-.6-.3-1.48c0-1.39.8-2.42 1.81-2.42.85 0 1.26.64 1.26 1.41 0 .86-.55 2.14-.83 3.33-.24 1 .5 1.81 1.48 1.81 1.78 0 3.15-1.88 3.15-4.59 0-2.4-1.72-4.08-4.19-4.08-2.85 0-4.53 2.14-4.53 4.35 0 .86.33 1.79.75 2.29a.3.3 0 0 1 .07.29l-.28 1.13c-.04.18-.15.22-.34.13-1.25-.58-2.03-2.4-2.03-3.87 0-3.16 2.29-6.06 6.61-6.06 3.47 0 6.17 2.47 6.17 5.78 0 3.45-2.18 6.23-5.2 6.23-1.01 0-1.97-.53-2.29-1.15l-.62 2.38c-.23.87-.84 1.96-1.25 2.63A10 10 0 1 0 12 2z"/></svg>
-    </a>
-  </div>
-  <p class="foot-legal">
-    For entertainment purposes only. Discover cosmic patterns, archetypes, and insights designed for
-    self-reflection and digital exploration. Readings are not medical, financial, legal, or relationship advice.
-    © 2026 Beacon Gaze.
-  </p>
+  <span>BeaconGaze · MMXXVI</span>
+  <span>Charts computed locally · nothing you enter leaves this page</span>
+  <span>Crafted at 60 frames per second</span>
 </footer>
 
-<div class="toast" id="toast" role="status"></div>
+<!-- ======================= LIBRARIES ======================= -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <script>
+/* =========================================================
+   BEACONGAZE · scroll-cinematic celestial engine
+   ========================================================= */
 "use strict";
-/* =====================================================================
-   CONFIG — paste your live links here
-   ===================================================================== */
-const CONFIG = {
-  checkout: {
-    basic:   "",   // e.g. "https://tally.so/r/yourBasicForm"
-    full:    "",   // e.g. "https://tally.so/r/yourFullForm"
-    premium: "",   // e.g. "https://tally.so/r/yourPremiumForm"
-  },
-  // Brevo: create an embedded form, copy its action URL here.
-  newsletterAction: "",  // e.g. "https://xxxxx.sibforms.com/serve/MUIFA..."
+
+/* ---------- cinematic sequence manifest ----------
+   hero: Higgsfield Cinema Studio sequence (scroll-scrubbed).
+   blueprint / alignments: additional sequences — drop URLs in
+   as they are generated; procedural cosmos covers them until then. */
+const SEQUENCES = {
+  hero: "https://d8j0ntlcm91z4.cloudfront.net/user_3G5s1BGkpgI3l1huxncd9ginzq8/hf_20260705_174559_a25bd8e7-e7b0-483b-8b38-15611bdecbfb.mp4",
+  alignments: "https://d8j0ntlcm91z4.cloudfront.net/user_3G5s1BGkpgI3l1huxncd9ginzq8/hf_20260705_183546_4da584c3-c27e-4d1e-8bae-4f9b85f51f2b.mp4",
+  blueprint: "https://d8j0ntlcm91z4.cloudfront.net/user_3G5s1BGkpgI3l1huxncd9ginzq8/hf_20260705_183602_f193d45d-ae36-4173-9469-9c7cbc5b20e4.mp4"
 };
 
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const isCoarse = window.matchMedia("(pointer: coarse)").matches;
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
+const PREFERS_STILL = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const TAU = Math.PI * 2, D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const norm360 = d => ((d % 360) + 360) % 360;
 
-function toast(msg){
-  const t = $("#toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.remove("show"), 3400);
+/* =========================================================
+   1 · ASTRONOMY ENGINE (local, no network)
+   ========================================================= */
+const SIGNS = ["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+const SIGN_GLYPHS = ["\u2648","\u2649","\u264A","\u264B","\u264C","\u264D","\u264E","\u264F","\u2650","\u2651","\u2652","\u2653"];
+const ELEMENTS = ["Fire","Earth","Air","Water"]; // sign i -> ELEMENTS[i%4]
+const PLANET_GLYPHS = {Sun:"\u2609",Moon:"\u263D",Mercury:"\u263F",Venus:"\u2640",Mars:"\u2642",Jupiter:"\u2643",Saturn:"\u2644",Ascendant:"AC"};
+
+function julianDay(y, m, d, hUT) {
+  if (m <= 2) { y -= 1; m += 12; }
+  const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5 + hUT / 24;
+}
+function centuries(jd) { return (jd - 2451545.0) / 36525; }
+
+function sunLongitude(jd) {
+  const T = centuries(jd);
+  const L0 = norm360(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
+  const M  = norm360(357.52911 + 35999.05029 * T - 0.0001537 * T * T);
+  const C  = (1.914602 - 0.004817 * T) * Math.sin(M * D2R)
+           + (0.019993 - 0.000101 * T) * Math.sin(2 * M * D2R)
+           + 0.000289 * Math.sin(3 * M * D2R);
+  return norm360(L0 + C);
+}
+function moonLongitude(jd) {
+  const T = centuries(jd);
+  const Lp = norm360(218.3164477 + 481267.88123421 * T);
+  const D  = norm360(297.8501921 + 445267.1114034 * T);
+  const M  = norm360(357.5291092 + 35999.0502909 * T);
+  const Mp = norm360(134.9633964 + 477198.8675055 * T);
+  const F  = norm360(93.2720950 + 483202.0175233 * T);
+  let lon = Lp
+    + 6.288774 * Math.sin(Mp * D2R)
+    + 1.274027 * Math.sin((2 * D - Mp) * D2R)
+    + 0.658314 * Math.sin(2 * D * D2R)
+    + 0.213618 * Math.sin(2 * Mp * D2R)
+    - 0.185116 * Math.sin(M * D2R)
+    - 0.114332 * Math.sin(2 * F * D2R)
+    + 0.058793 * Math.sin((2 * D - 2 * Mp) * D2R)
+    + 0.057066 * Math.sin((2 * D - M - Mp) * D2R)
+    + 0.053322 * Math.sin((2 * D + Mp) * D2R)
+    + 0.045758 * Math.sin((2 * D - M) * D2R);
+  return norm360(lon);
+}
+/* Keplerian elements (J2000, Standish low precision): a, e, I, L, w̄, Ω + rates/century */
+const KEPLER = {
+  Mercury:[0.38709927,0.20563593,7.00497902,252.25032350,77.45779628,48.33076593,
+           0.00000037,0.00001906,-0.00594749,149472.67411175,0.16047689,-0.12534081],
+  Venus:  [0.72333566,0.00677672,3.39467605,181.97909950,131.60246718,76.67984255,
+           0.00000390,-0.00004107,-0.00078890,58517.81538729,0.00268329,-0.27769418],
+  Earth:  [1.00000261,0.01671123,-0.00001531,100.46457166,102.93768193,0.0,
+           0.00000562,-0.00004392,-0.01294668,35999.37244981,0.32327364,0.0],
+  Mars:   [1.52371034,0.09339410,1.84969142,-4.55343205,-23.94362959,49.55953891,
+           0.00001847,0.00007882,-0.00813131,19140.30268499,0.44441088,-0.29257343],
+  Jupiter:[5.20288700,0.04838624,1.30439695,34.39644051,14.72847983,100.47390909,
+           -0.00011607,-0.00013253,-0.00183714,3034.74612775,0.21252668,0.20469106],
+  Saturn: [9.53667594,0.05386179,2.48599187,49.95424423,92.59887831,113.66242448,
+           -0.00125060,-0.00050991,0.00193609,1222.49362201,-0.41897216,-0.28867794]
+};
+function helioPosition(name, T) {
+  const e0 = KEPLER[name];
+  const a = e0[0] + e0[6] * T, ec = e0[1] + e0[7] * T, I = (e0[2] + e0[8] * T) * D2R;
+  const L = norm360(e0[3] + e0[9] * T), wbar = e0[4] + e0[10] * T, O = e0[5] + e0[11] * T;
+  const w = (wbar - O) * D2R, Om = O * D2R;
+  let M = norm360(L - wbar) * D2R;
+  let E = M + ec * Math.sin(M);
+  for (let i = 0; i < 8; i++) E = E - (E - ec * Math.sin(E) - M) / (1 - ec * Math.cos(E));
+  const xp = a * (Math.cos(E) - ec), yp = a * Math.sqrt(1 - ec * ec) * Math.sin(E);
+  const x = (Math.cos(w) * Math.cos(Om) - Math.sin(w) * Math.sin(Om) * Math.cos(I)) * xp
+          + (-Math.sin(w) * Math.cos(Om) - Math.cos(w) * Math.sin(Om) * Math.cos(I)) * yp;
+  const y = (Math.cos(w) * Math.sin(Om) + Math.sin(w) * Math.cos(Om) * Math.cos(I)) * xp
+          + (-Math.sin(w) * Math.sin(Om) + Math.cos(w) * Math.cos(Om) * Math.cos(I)) * yp;
+  return { x, y };
+}
+function planetLongitude(name, jd) {
+  const T = centuries(jd);
+  const p = helioPosition(name, T), e = helioPosition("Earth", T);
+  return norm360(Math.atan2(p.y - e.y, p.x - e.x) * R2D);
+}
+function ascendant(jd, latDeg, lonEastDeg) {
+  const T = centuries(jd);
+  let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T;
+  const lst = norm360(gmst + lonEastDeg);         // RAMC in degrees
+  const eps = (23.4392911 - 0.0130042 * T) * D2R;
+  const ramc = lst * D2R, phi = latDeg * D2R;
+  const asc = Math.atan2(Math.cos(ramc), -(Math.sin(ramc) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps)));
+  return norm360(asc * R2D);
+}
+function computeChart({ y, mo, d, h, mi, tz, lat, lon }) {
+  const jd = julianDay(y, mo, d, (h + mi / 60) - tz);
+  const bodies = [
+    { name: "Sun", lon: sunLongitude(jd) },
+    { name: "Moon", lon: moonLongitude(jd) },
+    { name: "Mercury", lon: planetLongitude("Mercury", jd) },
+    { name: "Venus", lon: planetLongitude("Venus", jd) },
+    { name: "Mars", lon: planetLongitude("Mars", jd) },
+    { name: "Jupiter", lon: planetLongitude("Jupiter", jd) },
+    { name: "Saturn", lon: planetLongitude("Saturn", jd) }
+  ];
+  const asc = ascendant(jd, lat, lon);
+  bodies.forEach(b => {
+    b.sign = Math.floor(b.lon / 30);
+    b.deg = b.lon % 30;
+    b.house = (Math.floor(norm360(b.lon - asc) / 30) + 1); // equal houses from ASC
+  });
+  const aspects = [];
+  const DEFS = [[0, "Conjunction", 8], [60, "Sextile", 5], [90, "Square", 7], [120, "Trine", 7], [180, "Opposition", 8]];
+  for (let i = 0; i < bodies.length; i++) for (let j = i + 1; j < bodies.length; j++) {
+    let sep = Math.abs(bodies[i].lon - bodies[j].lon); if (sep > 180) sep = 360 - sep;
+    for (const [ang, label, orb] of DEFS) if (Math.abs(sep - ang) <= orb) {
+      aspects.push({ a: bodies[i].name, b: bodies[j].name, type: label, angle: ang, orb: Math.abs(sep - ang) });
+      break;
+    }
+  }
+  const el = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
+  bodies.forEach(b => el[ELEMENTS[b.sign % 4]]++);
+  return { jd, asc, bodies, aspects, elements: el };
 }
 
-/* =====================================================================
-   STARFIELD ENGINE
-   - 3 parallax depth bands (far / mid / near)
-   - mouse-tracked parallax (lerped, desktop only)
-   - scroll-velocity streaking: fast scroll stretches stars vertically
-   - nebula color zones interpolate with scroll progress
-   - fake depth-of-field: far stars smaller, dimmer, slightly blurred halo
-   - DPR capped at 1.5; pauses on hidden tab; static frame if reduced motion
-   ===================================================================== */
-(function starfield(){
-  const canvas = $("#stars");
-  const ctx = canvas.getContext("2d");
-  let W = 0, H = 0, dpr = 1, stars = [];
-  let mouse = {x: 0, y: 0}, mouseLerp = {x: 0, y: 0};
-  let lastScroll = window.scrollY, velocity = 0;
-  let running = true;
-
-  // nebula zones keyed to scroll progress [0..1]: [hue blobs]
-  const ZONES = [
-    { at: 0.00, a: [99, 68, 245],  b: [61, 44, 160]  },  // hero: violet
-    { at: 0.30, a: [80, 90, 230],  b: [62, 180, 190] },  // mid: violet→teal bleed
-    { at: 0.62, a: [150, 60, 200], b: [99, 68, 245]  },  // real talk: magenta warmth
-    { at: 1.00, a: [30, 24, 70],   b: [12, 10, 30]   },  // footer: near black
-  ];
-  const lerp = (a, b, t) => a + (b - a) * t;
-  function zoneColors(p){
-    let i = 0;
-    while (i < ZONES.length - 2 && p > ZONES[i + 1].at) i++;
-    const z0 = ZONES[i], z1 = ZONES[i + 1];
-    const t = Math.min(1, Math.max(0, (p - z0.at) / (z1.at - z0.at)));
-    const mix = (c0, c1) => c0.map((v, k) => Math.round(lerp(v, c1[k], t)));
-    return { a: mix(z0.a, z1.a), b: mix(z0.b, z1.b) };
+/* =========================================================
+   2 · NATAL WHEEL (SVG instrument)
+   ========================================================= */
+const wheelSVG = document.getElementById("natal-wheel");
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  (parent || wheelSVG).appendChild(n); return n;
+}
+const C = 300;
+let ringOuter, ringZodiac, gAspects, gPlanets, gTicks;
+function buildWheelChrome() {
+  wheelSVG.innerHTML = "";
+  const defs = el("defs", {});
+  const grad = el("radialGradient", { id: "wheelbg", cx: "50%", cy: "50%" }, defs);
+  el("stop", { offset: "0%", "stop-color": "rgba(42,27,82,.55)" }, grad);
+  el("stop", { offset: "70%", "stop-color": "rgba(10,6,32,.25)" }, grad);
+  el("stop", { offset: "100%", "stop-color": "rgba(5,3,16,0)" }, grad);
+  const lg = el("linearGradient", { id: "aspgrad", x1: "0", y1: "0", x2: "1", y2: "1" }, defs);
+  el("stop", { offset: "0", "stop-color": "#4fc3ff" }, lg);
+  el("stop", { offset: "1", "stop-color": "#ff8a3c" }, lg);
+  el("circle", { cx: C, cy: C, r: 292, fill: "url(#wheelbg)" });
+  ringOuter = el("g", {});
+  el("circle", { cx: C, cy: C, r: 288, fill: "none", stroke: "rgba(233,230,244,.28)", "stroke-width": 1 }, ringOuter);
+  el("circle", { cx: C, cy: C, r: 236, fill: "none", stroke: "rgba(233,230,244,.16)", "stroke-width": 1 }, ringOuter);
+  el("circle", { cx: C, cy: C, r: 160, fill: "none", stroke: "rgba(139,108,240,.35)", "stroke-width": .8, "stroke-dasharray": "2 6" }, ringOuter);
+  gTicks = el("g", {}, ringOuter);
+  for (let i = 0; i < 360; i += 2) {
+    const maj = i % 30 === 0, mid = i % 10 === 0;
+    const r1 = 288, r2 = maj ? 272 : mid ? 279 : 284;
+    const a = (i - 90) * D2R;
+    el("line", {
+      x1: C + r1 * Math.cos(a), y1: C + r1 * Math.sin(a),
+      x2: C + r2 * Math.cos(a), y2: C + r2 * Math.sin(a),
+      stroke: maj ? "rgba(255,138,60,.8)" : "rgba(233,230,244,.28)", "stroke-width": maj ? 1.4 : .6
+    }, gTicks);
   }
-
-  function resize(){
-    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const target = isCoarse ? 140 : Math.min(420, Math.floor(W * H / 4200));
-    stars = Array.from({length: target}, () => {
-      const depth = Math.random();                     // 0 far … 1 near
-      return {
-        x: Math.random() * W, y: Math.random() * H,
-        depth,
-        r: 0.4 + depth * 1.7,                          // near stars bigger
-        base: 0.25 + depth * 0.6,                      // near stars brighter
-        tw: Math.random() * Math.PI * 2,
-        twSpeed: 0.4 + Math.random() * 1.2,
-        drift: (Math.random() - 0.5) * 0.05,
-      };
-    });
+  ringZodiac = el("g", {});
+  for (let s = 0; s < 12; s++) {
+    const mid = (s * 30 + 15 - 90) * D2R, r = 262;
+    el("text", {
+      x: C + r * Math.cos(mid), y: C + r * Math.sin(mid),
+      fill: "rgba(233,230,244,.8)", "font-size": 19, "text-anchor": "middle",
+      "dominant-baseline": "central"
+    }, ringZodiac).textContent = SIGN_GLYPHS[s];
   }
-
-  function drawNebula(p){
-    const {a, b} = zoneColors(p);
-    const g1 = ctx.createRadialGradient(W * 0.22, H * (0.28 + p * 0.2), 0, W * 0.22, H * (0.28 + p * 0.2), Math.max(W, H) * 0.55);
-    g1.addColorStop(0, `rgba(${a[0]},${a[1]},${a[2]},0.10)`);
-    g1.addColorStop(1, "rgba(0,0,0,0)");
-    const g2 = ctx.createRadialGradient(W * 0.82, H * (0.72 - p * 0.25), 0, W * 0.82, H * (0.72 - p * 0.25), Math.max(W, H) * 0.5);
-    g2.addColorStop(0, `rgba(${b[0]},${b[1]},${b[2]},0.09)`);
-    g2.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
-  }
-
-  function frame(t){
-    if (!running) return;
-    const doc = document.documentElement;
-    const progress = Math.min(1, window.scrollY / Math.max(1, doc.scrollHeight - H));
-
-    // scroll velocity → streak factor, decays each frame
-    const sc = window.scrollY;
-    velocity = velocity * 0.9 + (sc - lastScroll) * 0.1;
-    lastScroll = sc;
-    const streak = Math.min(14, Math.abs(velocity) * 0.35);
-
-    // mouse parallax lerp (250ms feel)
-    mouseLerp.x = lerp(mouseLerp.x, mouse.x, 0.06);
-    mouseLerp.y = lerp(mouseLerp.y, mouse.y, 0.06);
-
-    ctx.clearRect(0, 0, W, H);
-    drawNebula(progress);
-
-    for (const s of stars){
-      const px = isCoarse ? 0 : mouseLerp.x * s.depth * 22;
-      // scroll parallax: near layers drift up faster as you scroll
-      const py = (isCoarse ? 0 : mouseLerp.y * s.depth * 22) - (sc * s.depth * 0.12) % (H + 40);
-      let y = s.y + py;
-      y = ((y % (H + 40)) + (H + 40)) % (H + 40) - 20;
-      let x = s.x + px + Math.sin(t / 4000 + s.tw) * s.drift * 40;
-
-      const twinkle = 0.65 + 0.35 * Math.sin(t / 900 * s.twSpeed + s.tw);
-      const alpha = s.base * twinkle;
-
-      if (streak > 1.5 && s.depth > 0.35){
-        // velocity streaking on nearer stars
-        ctx.strokeStyle = `rgba(200,190,255,${(alpha * 0.9).toFixed(3)})`;
-        ctx.lineWidth = s.r;
-        ctx.beginPath();
-        ctx.moveTo(x, y - streak * s.depth * Math.sign(velocity));
-        ctx.lineTo(x, y);
-        ctx.stroke();
-      } else {
-        // far stars get a soft halo → fake depth of field
-        if (s.depth < 0.3){
-          ctx.fillStyle = `rgba(155,134,255,${(alpha * 0.35).toFixed(3)})`;
-          ctx.beginPath(); ctx.arc(x, y, s.r * 2.4, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.fillStyle = `rgba(220,214,255,${alpha.toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(x, y, s.r, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-    if (!reducedMotion) requestAnimationFrame(frame);
-  }
-
-  window.addEventListener("resize", resize, {passive: true});
-  if (!isCoarse){
-    window.addEventListener("pointermove", e => {
-      mouse.x = (e.clientX / W - 0.5) * 2;
-      mouse.y = (e.clientY / H - 0.5) * 2;
-    }, {passive: true});
-  }
-  document.addEventListener("visibilitychange", () => {
-    running = !document.hidden;
-    if (running && !reducedMotion) requestAnimationFrame(frame);
+  gAspects = el("g", {});
+  gPlanets = el("g", {});
+  el("circle", { cx: C, cy: C, r: 4, fill: "#e9e6f4" });
+}
+function renderChartOnWheel(chart) {
+  gAspects.innerHTML = ""; gPlanets.innerHTML = "";
+  const rot = chart.asc; // rotate so the Ascendant sits at 9 o'clock (left), classic chart orientation
+  const angleOf = lon => (180 + (lon - rot)) * D2R * -1 + Math.PI; // ASC at left, counterclockwise zodiac
+  const pos = (lon, r) => {
+    const a = ((lon - rot) * -1 + 180) * D2R;
+    return [C + r * Math.cos(a), C + r * Math.sin(a)];
+  };
+  // aspect filaments
+  chart.aspects.forEach((asp, i) => {
+    const A = chart.bodies.find(b => b.name === asp.a), B = chart.bodies.find(b => b.name === asp.b);
+    const [x1, y1] = pos(A.lon, 152), [x2, y2] = pos(B.lon, 152);
+    const line = el("line", {
+      x1, y1, x2, y2, stroke: "url(#aspgrad)", "stroke-width": asp.angle === 120 || asp.angle === 60 ? 1.2 : .8,
+      opacity: 0, "stroke-dasharray": 400, "stroke-dashoffset": 400,
+      class: "asp-line"
+    }, gAspects);
+    if (!PREFERS_STILL && window.gsap) {
+      gsap.to(line, { opacity: .8, strokeDashoffset: 0, duration: 1.6, delay: .15 * i, ease: "power2.out" });
+    } else { line.setAttribute("opacity", .8); line.setAttribute("stroke-dashoffset", 0); }
   });
+  // planet markers
+  chart.bodies.forEach((b, i) => {
+    const [x, y] = pos(b.lon, 205);
+    const g = el("g", { opacity: 0 }, gPlanets);
+    el("circle", { cx: x, cy: y, r: 13, fill: "rgba(5,3,16,.85)", stroke: "rgba(79,195,255,.6)", "stroke-width": .8 }, g);
+    el("text", { x, y: y + 1, fill: "#e9e6f4", "font-size": 13, "text-anchor": "middle", "dominant-baseline": "central" }, g)
+      .textContent = PLANET_GLYPHS[b.name];
+    const [lx, ly] = pos(b.lon, 224);
+    el("line", { x1: x, y1: y, x2: lx, y2: ly, stroke: "rgba(233,230,244,.25)", "stroke-width": .6 }, g);
+    if (!PREFERS_STILL && window.gsap) gsap.to(g, { opacity: 1, duration: .9, delay: .1 * i + .4, ease: "power2.out" });
+    else g.setAttribute("opacity", 1);
+  });
+  // ascendant marker
+  const [ax, ay] = pos(chart.asc, 288), [ax2, ay2] = pos(chart.asc, 240);
+  el("line", { x1: ax, y1: ay, x2: ax2, y2: ay2, stroke: "#ff8a3c", "stroke-width": 2 }, gPlanets);
+}
+buildWheelChrome();
 
-  resize();
-  requestAnimationFrame(frame); // draws one static frame under reduced motion
-})();
+/* =========================================================
+   3 · PROFILE — the visitor becomes the main character
+   ========================================================= */
+const tzSel = document.getElementById("bf-tz");
+for (let t = -12; t <= 14; t += 0.5) {
+  const o = document.createElement("option");
+  o.value = t; o.textContent = "UTC" + (t >= 0 ? "+" : "") + t;
+  if (t === -5) o.selected = true;
+  tzSel.appendChild(o);
+}
+let CHART = null, PROFILE_NAME = "";
+function readForm() {
+  const dv = document.getElementById("bf-date").value || "1994-08-17";
+  const tv = document.getElementById("bf-time").value || "04:44";
+  const [y, mo, d] = dv.split("-").map(Number);
+  const [h, mi] = tv.split(":").map(Number);
+  return {
+    y, mo, d, h, mi,
+    tz: parseFloat(tzSel.value),
+    lat: parseFloat(document.getElementById("bf-lat").value) || 0,
+    lon: parseFloat(document.getElementById("bf-lon").value) || 0
+  };
+}
+function fmtDeg(lonInSign) {
+  const dg = Math.floor(lonInSign), m = Math.floor((lonInSign - dg) * 60);
+  return dg + "\u00B0" + String(m).padStart(2, "0") + "\u2032";
+}
+function updateSpecs(chart) {
+  const tb = document.getElementById("spec-body");
+  tb.innerHTML = "";
+  const rows = [...chart.bodies, { name: "Ascendant", lon: chart.asc, sign: Math.floor(chart.asc / 30), deg: chart.asc % 30, house: 1 }];
+  rows.forEach(b => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><span class="glyph">${PLANET_GLYPHS[b.name]}</span>${b.name}</td>
+      <td>${SIGN_GLYPHS[b.sign]} ${SIGNS[b.sign]}</td>
+      <td class="deg">${fmtDeg(b.deg)}</td>
+      <td class="house-col">House ${b.house}</td>`;
+    tb.appendChild(tr);
+  });
+  const strongest = chart.aspects.slice().sort((a, b) => a.orb - b.orb)[0];
+  document.getElementById("aspect-summary").textContent = chart.aspects.length
+    ? `${chart.aspects.length} major aspects resolved. Tightest filament: ${strongest.a} ${strongest.type.toLowerCase()} ${strongest.b}, within ${strongest.orb.toFixed(2)}\u00B0 of exact.`
+    : "A quiet sky: no major aspects within orb — rare, and its own signature.";
+  document.getElementById("spec-name").textContent = PROFILE_NAME ? `${PROFILE_NAME}\u2019s sky.` : "your sky.";
+  ["fire","water","air","earth"].forEach(k => {
+    const K = k[0].toUpperCase() + k.slice(1);
+    document.getElementById("el-" + k).textContent = `${K} \u00B7 ${chart.elements[K]}`;
+  });
+}
+function castChart(fromUser) {
+  PROFILE_NAME = document.getElementById("bf-name").value.trim();
+  CHART = computeChart(readForm());
+  renderChartOnWheel(CHART);
+  updateSpecs(CHART);
+  paintAura(CHART);
+  if (fromUser) {
+    const w = document.getElementById("wheel-wrap");
+    if (window.gsap && !PREFERS_STILL) gsap.fromTo(w, { scale: .94 }, { scale: 1, duration: 1.2, ease: "elastic.out(1,.6)" });
+    document.getElementById("wheel-wrap").scrollIntoView({ behavior: PREFERS_STILL ? "auto" : "smooth", block: "center" });
+  }
+}
+document.getElementById("birth-form").addEventListener("submit", e => { e.preventDefault(); castChart(true); });
 
-/* =====================================================================
-   SCROLL REVEAL (IntersectionObserver, fires once per element)
-   ===================================================================== */
-(function reveals(){
-  const targets = $$("[data-reveal], [data-stagger]");
-  if (reducedMotion){ targets.forEach(el => el.classList.add("in")); return; }
-  const io = new IntersectionObserver(entries => {
-    for (const e of entries){
-      if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
-    }
-  }, {threshold: 0.18, rootMargin: "0px 0px -40px 0px"});
-  targets.forEach(el => io.observe(el));
-})();
+/* live transit telemetry (section 3) */
+function updateTelemetry() {
+  const now = new Date();
+  const jd = julianDay(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(),
+    now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600);
+  const sl = sunLongitude(jd), ml = moonLongitude(jd);
+  const phase = norm360(ml - sl);
+  const illum = (1 - Math.cos(phase * D2R)) / 2 * 100;
+  const phaseName = phase < 22 ? "New" : phase < 90 ? "Waxing Crescent" : phase < 112 ? "First Quarter"
+    : phase < 170 ? "Waxing Gibbous" : phase < 190 ? "Full" : phase < 270 ? "Waning Gibbous"
+    : phase < 292 ? "Last Quarter" : "Waning Crescent";
+  document.getElementById("m-sun").textContent = SIGN_GLYPHS[Math.floor(sl / 30)] + " " + fmtDeg(sl % 30);
+  document.getElementById("m-moon").textContent = SIGN_GLYPHS[Math.floor(ml / 30)] + " " + fmtDeg(ml % 30);
+  document.getElementById("m-phase").textContent = Math.round(illum) + "%";
+  document.querySelector("#m-phase + span").textContent = "Lunar phase \u00B7 " + phaseName;
+  if (CHART) {
+    const natal = CHART.bodies[0].lon;
+    let diff = norm360(natal - sl);
+    document.getElementById("m-next").textContent = Math.round(diff / 0.9856);
+  }
+}
+setInterval(updateTelemetry, 30000);
 
-/* =====================================================================
-   CONSTELLATION LINES (social proof)
-   Connects the anchor dot above each quote card with faint lines,
-   redrawn on resize and after the stagger reveal completes.
-   ===================================================================== */
-(function constellation(){
-  const canvas = $("#constellation");
-  const section = $("#proof");
-  const ctx = canvas.getContext("2d");
-  function draw(){
-    const rect = section.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + "px"; canvas.style.height = rect.height + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-
-    const dots = $$(".quote").map(q => {
-      const r = q.getBoundingClientRect();
-      return { x: r.left - rect.left + r.width / 2, y: r.top - rect.top - 0 };
-    });
-    // scatter a few ambient dots between the anchors
-    const ambient = [];
-    for (let i = 0; i < 7; i++){
-      ambient.push({
-        x: rect.width * (0.08 + 0.84 * ((i * 0.618) % 1)),
-        y: rect.height * (0.12 + 0.30 * ((i * 0.377) % 1)),
+/* =========================================================
+   4 · AURA FIELD (elemental spectrum canvas)
+   ========================================================= */
+const auraCv = document.getElementById("aura-canvas"), actx = auraCv.getContext("2d");
+const AURA_COLORS = { Fire: [255, 138, 60], Water: [79, 195, 255], Air: [233, 230, 244], Earth: [139, 108, 240] };
+let auraBlobs = [];
+function paintAura(chart) {
+  auraBlobs = [];
+  const total = 7;
+  Object.entries(chart.elements).forEach(([elName, count]) => {
+    for (let i = 0; i < count; i++) {
+      auraBlobs.push({
+        c: AURA_COLORS[elName],
+        r: 130 + Math.random() * 190,
+        a: Math.random() * TAU,
+        d: 70 + Math.random() * 190,
+        sp: (0.05 + Math.random() * 0.12) * (Math.random() < .5 ? -1 : 1),
+        w: count / total
       });
     }
-    const all = [...dots, ...ambient];
-    ctx.strokeStyle = "rgba(155,134,255,.18)";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < all.length; i++){
-      for (let j = i + 1; j < all.length; j++){
-        const dx = all[i].x - all[j].x, dy = all[i].y - all[j].y;
-        if (Math.hypot(dx, dy) < rect.width * 0.4){
-          ctx.beginPath(); ctx.moveTo(all[i].x, all[i].y); ctx.lineTo(all[j].x, all[j].y); ctx.stroke();
-        }
-      }
-    }
-    ctx.fillStyle = "rgba(155,134,255,.55)";
-    ambient.forEach(d => { ctx.beginPath(); ctx.arc(d.x, d.y, 2, 0, Math.PI * 2); ctx.fill(); });
+  });
+}
+let auraT = 0;
+function drawAura() {
+  auraT += PREFERS_STILL ? 0 : 0.006;
+  const W = auraCv.width, H = auraCv.height;
+  actx.clearRect(0, 0, W, H);
+  actx.save();
+  actx.beginPath(); actx.arc(W / 2, H / 2, W / 2 - 2, 0, TAU); actx.clip();
+  actx.fillStyle = "#050310"; actx.fillRect(0, 0, W, H);
+  actx.globalCompositeOperation = "lighter";
+  auraBlobs.forEach(b => {
+    const x = W / 2 + Math.cos(b.a + auraT * b.sp * 10) * b.d;
+    const y = H / 2 + Math.sin(b.a * 1.3 + auraT * b.sp * 8) * b.d;
+    const g = actx.createRadialGradient(x, y, 0, x, y, b.r);
+    const [r, gg, bb] = b.c;
+    g.addColorStop(0, `rgba(${r},${gg},${bb},${0.16 + b.w * 0.12})`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    actx.fillStyle = g;
+    actx.beginPath(); actx.arc(x, y, b.r, 0, TAU); actx.fill();
+  });
+  actx.restore();
+}
+
+/* =========================================================
+   5 · THREE.JS COSMOS — constellations, filaments, stardust
+   ========================================================= */
+const cosmos = document.getElementById("cosmos");
+const renderer = new THREE.WebGLRenderer({ canvas: cosmos, antialias: false, alpha: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x050310, 0.016);
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.1, 400);
+camera.position.z = 60;
+
+function starTexture(color) {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const x = c.getContext("2d");
+  const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, "rgba(255,255,255,1)");
+  g.addColorStop(0.25, color);
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); return t;
+}
+const PALETTE = ["rgba(139,108,240,.9)", "rgba(79,195,255,.9)", "rgba(255,138,60,.9)", "rgba(233,230,244,.9)"];
+const dustGroups = [];
+PALETTE.forEach((col, gi) => {
+  const N = gi === 3 ? 2600 : 900;
+  const pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    pos[i * 3] = (Math.random() - .5) * 240;
+    pos[i * 3 + 1] = (Math.random() - .5) * 160;
+    pos[i * 3 + 2] = -Math.random() * 320 + 60;
   }
-  window.addEventListener("resize", () => requestAnimationFrame(draw), {passive: true});
-  window.addEventListener("load", draw);
-  setTimeout(draw, 1300); // after stagger reveal settles
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({
+    size: gi === 3 ? 0.7 : 1.5, map: starTexture(col), transparent: true,
+    depthWrite: false, blending: THREE.AdditiveBlending, opacity: gi === 3 ? .85 : .7
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts); dustGroups.push(pts);
+});
+
+/* constellation clusters with silver filaments */
+const constGroup = new THREE.Group(); scene.add(constGroup);
+const lineMat = new THREE.LineBasicMaterial({ color: 0xe9e6f4, transparent: true, opacity: 0.16 });
+const nodeMat = new THREE.PointsMaterial({ size: 2.4, map: starTexture("rgba(233,230,244,.95)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+for (let k = 0; k < 14; k++) {
+  const cx = (Math.random() - .5) * 200, cy = (Math.random() - .5) * 110, cz = -20 - Math.random() * 280;
+  const n = 4 + Math.floor(Math.random() * 4);
+  const verts = [];
+  for (let i = 0; i < n; i++) verts.push(new THREE.Vector3(cx + (Math.random() - .5) * 26, cy + (Math.random() - .5) * 18, cz + (Math.random() - .5) * 8));
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(verts);
+  constGroup.add(new THREE.Line(lineGeo, lineMat));
+  const pGeo = new THREE.BufferGeometry().setFromPoints(verts);
+  constGroup.add(new THREE.Points(pGeo, nodeMat));
+}
+/* distant glossy planet */
+const planet = new THREE.Mesh(
+  new THREE.SphereGeometry(9, 48, 48),
+  new THREE.MeshStandardMaterial({ color: 0x2a1b52, roughness: .25, metalness: .85, emissive: 0x120a2e })
+);
+planet.position.set(34, -10, -150); scene.add(planet);
+const rim = new THREE.PointLight(0xff8a3c, 3.2, 300); rim.position.set(80, 30, -110); scene.add(rim);
+const key = new THREE.PointLight(0x4fc3ff, 2.4, 300); key.position.set(-70, -20, -80); scene.add(key);
+scene.add(new THREE.AmbientLight(0x8b6cf0, .35));
+
+let mouseX = 0, mouseY = 0, scrollDepth = 0;
+addEventListener("pointermove", e => {
+  mouseX = (e.clientX / innerWidth - .5); mouseY = (e.clientY / innerHeight - .5);
+});
+function sizeAll() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  const ac = document.getElementById("align-canvas");
+  ac.width = ac.clientWidth; ac.height = ac.clientHeight;
+}
+addEventListener("resize", sizeAll); sizeAll();
+
+/* procedural nebula plate for the Alignments section (fallback + underlay) */
+const alignCv = document.getElementById("align-canvas"), alx = alignCv.getContext("2d");
+function drawAlignPlate(t) {
+  const W = alignCv.width, H = alignCv.height;
+  if (!W || !H) return;
+  alx.fillStyle = "#050310"; alx.fillRect(0, 0, W, H);
+  alx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 5; i++) {
+    const x = W * (0.15 + 0.18 * i) + Math.sin(t * .2 + i * 2.1) * 40;
+    const y = H * .5 + Math.cos(t * .16 + i * 1.7) * 60;
+    const r = Math.min(W, H) * (.34 + .1 * Math.sin(t * .3 + i));
+    const cols = [[139,108,240],[79,195,255],[255,138,60],[42,27,82],[233,230,244]];
+    const [cr, cg, cb] = cols[i];
+    const g = alx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${cr},${cg},${cb},.13)`);
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    alx.fillStyle = g; alx.beginPath(); alx.arc(x, y, r, 0, TAU); alx.fill();
+  }
+  alx.globalCompositeOperation = "source-over";
+}
+
+let T0 = performance.now();
+function frame(now) {
+  const t = (now - T0) / 1000;
+  if (!PREFERS_STILL) {
+    camera.position.x += (mouseX * 7 - camera.position.x) * .04;
+    camera.position.y += (-mouseY * 4.5 - camera.position.y) * .04;
+    camera.position.z = 60 - scrollDepth * 210;
+    camera.lookAt(0, 0, camera.position.z - 60);
+    constGroup.rotation.z = t * .008 + scrollDepth * .5;
+    planet.rotation.y = t * .06;
+    dustGroups.forEach((g, i) => { g.rotation.z = t * .004 * (i % 2 ? 1 : -1); });
+  }
+  renderer.render(scene, camera);
+  drawAura();
+  drawAlignPlate(t);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* =========================================================
+   6 · SCROLL CHOREOGRAPHY — GSAP ScrollTrigger
+   ========================================================= */
+gsap.registerPlugin(ScrollTrigger);
+
+/* depth HUD + camera dolly mapped to total scroll */
+ScrollTrigger.create({
+  start: 0, end: () => document.documentElement.scrollHeight - innerHeight,
+  onUpdate: self => {
+    scrollDepth = self.progress;
+    document.getElementById("hud-depth").textContent = (self.progress * 9.461).toFixed(3);
+  }
+});
+
+/* hero film scrub — scroll drives the movie (Tier-1 mechanic)
+   Two engines, auto-selected:
+   A) FRAME-SEQUENCE mode — if assets/frames/hero/manifest.json exists
+      (produced by scripts/slice-frames.sh), scroll scrubs pre-sliced,
+      optimized webp frames on a canvas: zero seek latency, Apple-style.
+   B) VIDEO-SEEK mode — otherwise the 1080p master is scrubbed directly
+      via smoothed currentTime seeking from the CDN. */
+const film = document.getElementById("hero-film");
+let filmReady = false, filmTarget = 0, filmCurrent = 0;
+let frameMode = false, frames = [], frameCanvas = null, frameCtx = null, lastFrameIdx = -1;
+function enableFrameMode(manifest) {
+  frameCanvas = document.createElement("canvas");
+  frameCanvas.id = "hero-frames";
+  frameCanvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover";
+  document.getElementById("hero-stage").prepend(frameCanvas);
+  frameCtx = frameCanvas.getContext("2d");
+  frameCanvas.width = manifest.width; frameCanvas.height = manifest.height;
+  let loaded = 0;
+  manifest.frames.forEach((f, i) => {
+    const img = new Image();
+    img.src = "assets/frames/hero/" + f;
+    img.onload = () => { if (++loaded > manifest.frames.length * .25 && !frameMode) { frameMode = true; film.remove(); drawFrame(0); } };
+    frames[i] = img;
+  });
+}
+function drawFrame(p) {
+  const idx = Math.min(frames.length - 1, Math.floor(p * frames.length));
+  if (idx === lastFrameIdx || !frames[idx] || !frames[idx].complete) return;
+  lastFrameIdx = idx;
+  frameCtx.drawImage(frames[idx], 0, 0, frameCanvas.width, frameCanvas.height);
+}
+function mountHeroFilm() {
+  fetch("assets/frames/hero/manifest.json").then(r => r.ok ? r.json() : null)
+    .then(m => { if (m && m.frames && m.frames.length) enableFrameMode(m); })
+    .catch(() => {});
+  if (!SEQUENCES.hero || SEQUENCES.hero.startsWith("__")) return;
+  film.src = SEQUENCES.hero;
+  film.addEventListener("loadedmetadata", () => {
+    filmReady = true; film.classList.add("live");
+    film.pause(); film.currentTime = 0;
+  });
+  film.load();
+}
+mountHeroFilm();
+/* additional celestial sequences: mount into their sections when URLs are present */
+function mountSectionFilm(url, frameSel, scrubTrigger) {
+  if (!url || url.startsWith("__")) return;
+  const frame = document.querySelector(frameSel);
+  const v = document.createElement("video");
+  v.muted = true; v.playsInline = true; v.loop = true; v.preload = "none";
+  v.setAttribute("crossorigin", "anonymous");
+  v.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.4s";
+  frame.prepend(v);
+  /* lazy-load: only fetch when the section approaches the viewport */
+  new IntersectionObserver((es, obs) => {
+    es.forEach(en => {
+      if (!en.isIntersecting) return;
+      v.src = url; v.load();
+      v.addEventListener("loadeddata", () => { v.style.opacity = ".55"; v.play().catch(() => {}); });
+      obs.disconnect();
+    });
+  }, { rootMargin: "600px" }).observe(frame);
+  if (scrubTrigger && !PREFERS_STILL) {
+    let tgt = 0, curT = 0;
+    ScrollTrigger.create({ trigger: scrubTrigger, start: "top bottom", end: "bottom top", scrub: true,
+      onUpdate: s => { tgt = s.progress; } });
+  }
+}
+mountSectionFilm(SEQUENCES.alignments, "#align-film-frame", "#alignments");
+mountSectionFilm(SEQUENCES.blueprint, "#wheel-wrap", null);
+ScrollTrigger.create({
+  trigger: "#nexus", start: "top top", end: "bottom top", scrub: true,
+  onUpdate: self => { filmTarget = self.progress; }
+});
+(function scrubLoop() {
+  filmCurrent += (filmTarget - filmCurrent) * .12;
+  if (frameMode) {
+    drawFrame(Math.max(0, Math.min(1, filmCurrent)));
+  } else if (filmReady && film.duration) {
+    const t = Math.min(film.duration - .05, Math.max(0, filmCurrent * film.duration));
+    if (Math.abs(film.currentTime - t) > 0.02) film.currentTime = t;
+  }
+  requestAnimationFrame(scrubLoop);
 })();
 
-/* =====================================================================
-   FAQ ACCORDION (smooth 0fr→1fr grid expansion, no snaps)
-   ===================================================================== */
-$$(".faq button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const item = btn.closest(".faq");
-    const open = item.classList.contains("open");
-    $$(".faq.open").forEach(f => {
-      f.classList.remove("open");
-      f.querySelector("button").setAttribute("aria-expanded", "false");
-    });
-    if (!open){
-      item.classList.add("open");
-      btn.setAttribute("aria-expanded", "true");
-    }
+/* hero copy drifts and dissolves upward as you descend (transform/scale only) */
+if (!PREFERS_STILL) {
+  gsap.to("#hero-copy", {
+    yPercent: -28, scale: .94, ease: "none",
+    scrollTrigger: { trigger: "#nexus", start: "top top", end: "bottom top", scrub: true }
   });
+  gsap.to("#scroll-cue", {
+    yPercent: 160, ease: "none",
+    scrollTrigger: { trigger: "#nexus", start: "top top", end: "40% top", scrub: true }
+  });
+}
+
+/* natal wheel slow revolution tied to scroll */
+if (!PREFERS_STILL) {
+  gsap.to("#natal-wheel", {
+    rotation: 48, transformOrigin: "50% 50%", ease: "none",
+    scrollTrigger: { trigger: "#blueprint", start: "top bottom", end: "bottom top", scrub: 1.2 }
+  });
+}
+
+/* chapter headline builds — fire on mount, staggered per section (screenshot-safe) */
+document.querySelectorAll(".chapter .display, #hero-copy h1").forEach(h => {
+  if (PREFERS_STILL) return;
+  gsap.from(h, { y: 46, duration: 1.5, ease: "power3.out", delay: .2,
+    scrollTrigger: { trigger: h, start: "top 92%" , toggleActions: "play none none none" } });
+});
+document.querySelectorAll(".metric, .qcard, .step").forEach((c, i) => {
+  if (PREFERS_STILL) return;
+  gsap.from(c, { y: 34, duration: 1.1, ease: "power3.out",
+    scrollTrigger: { trigger: c, start: "top 96%" } });
 });
 
-/* =====================================================================
-   CHECKOUT BUTTONS → your Tally links (CONFIG.checkout)
-   ===================================================================== */
-$$("[data-checkout]").forEach(el => {
-  el.addEventListener("click", e => {
-    const tier = el.getAttribute("data-checkout");
-    const url = CONFIG.checkout[tier];
-    if (url){
-      e.preventDefault();
-      window.open(url, "_blank", "noopener");
-    } else if (el.tagName === "BUTTON"){
-      toast("Checkout link not connected yet — paste your Tally URL for '" + tier + "' into CONFIG.checkout at the top of the script.");
-    }
-    // anchor CTAs without a URL simply scroll to #pricing via their href
+/* magnetic CTAs */
+document.querySelectorAll(".cta-descent,.cta-reserve,.cta-kit").forEach(btn => {
+  btn.addEventListener("pointermove", e => {
+    if (PREFERS_STILL) return;
+    const r = btn.getBoundingClientRect();
+    gsap.to(btn, { x: (e.clientX - r.left - r.width / 2) * .18, y: (e.clientY - r.top - r.height / 2) * .3, duration: .4 });
   });
+  btn.addEventListener("pointerleave", () => gsap.to(btn, { x: 0, y: 0, duration: .7, ease: "elastic.out(1,.5)" }));
 });
 
-/* =====================================================================
-   NEWSLETTER → Brevo (CONFIG.newsletterAction)
-   ===================================================================== */
-$("#nl-form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const email = $("#nl-email").value.trim();
-  const name = $("#nl-name").value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    toast("That email doesn't look right — mind checking it?");
-    $("#nl-email").focus();
-    return;
-  }
-  if (!CONFIG.newsletterAction){
-    toast("Newsletter isn't wired up yet — paste your Brevo form action URL into CONFIG.newsletterAction.");
-    return;
-  }
-  try {
-    const data = new FormData();
-    data.append("EMAIL", email);
-    if (name) data.append("FIRSTNAME", name);
-    await fetch(CONFIG.newsletterAction, { method: "POST", body: data, mode: "no-cors" });
-    toast("You're in ✦ Your first forecast arrives Sunday.");
-    e.target.reset();
-  } catch {
-    toast("Something hiccuped — please try again in a moment.");
-  }
+/* smooth anchor glide */
+document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
+  const t = document.querySelector(a.getAttribute("href"));
+  if (!t) return; e.preventDefault();
+  t.scrollIntoView({ behavior: PREFERS_STILL ? "auto" : "smooth" });
+}));
+
+/* =========================================================
+   7 · CURSOR · LOADER · BOOT
+   ========================================================= */
+const cur = document.getElementById("cursor"), halo = document.getElementById("cursor-halo");
+let hx = innerWidth / 2, hy = innerHeight / 2;
+addEventListener("pointermove", e => {
+  cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
+  hx += (e.clientX - hx); hy += (e.clientY - hy);
 });
+(function haloLoop() {
+  const r = halo.getBoundingClientRect();
+  const cx = parseFloat(halo.style.left || innerWidth / 2), cy = parseFloat(halo.style.top || innerHeight / 2);
+  halo.style.left = cx + (hx - cx) * .16 + "px";
+  halo.style.top = cy + (hy - cy) * .16 + "px";
+  requestAnimationFrame(haloLoop);
+})();
+document.querySelectorAll("a,button,input,select").forEach(n => {
+  n.addEventListener("pointerenter", () => document.body.classList.add("cursor-active"));
+  n.addEventListener("pointerleave", () => document.body.classList.remove("cursor-active"));
+});
+
+/* premium slow-reveal load sequence */
+const loadbar = document.getElementById("loadbar");
+let fakeP = 0;
+const loadTick = setInterval(() => {
+  fakeP = Math.min(96, fakeP + Math.random() * 14);
+  loadbar.style.width = fakeP + "%";
+}, 180);
+function finishLoad() {
+  clearInterval(loadTick);
+  loadbar.style.width = "100%";
+  setTimeout(() => {
+    document.getElementById("loader").classList.add("done");
+    document.getElementById("topnav").classList.add("on");
+    if (!PREFERS_STILL) {
+      gsap.from("#hero-copy .house", { opacity: 0, y: 18, duration: 1.4, delay: .3 });
+      gsap.from("#hero-copy .sub, #hero-copy .cta-descent", { opacity: 0, y: 24, duration: 1.4, delay: .7, stagger: .18 });
+    }
+  }, 500);
+}
+addEventListener("load", () => setTimeout(finishLoad, 1400));
+setTimeout(finishLoad, 6000); /* hard failsafe */
+
+/* boot the default chart so the story has a protagonist immediately */
+castChart(false);
+updateTelemetry();
+ScrollTrigger.refresh();
 </script>
 </body>
 </html>
