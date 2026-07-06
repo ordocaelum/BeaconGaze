@@ -216,6 +216,8 @@ section{position:relative;z-index:2}
 #aura-canvas-wrap{position:relative;width:min(560px,84vw);aspect-ratio:1;margin:3rem auto 0}
 #aura-canvas{width:100%;height:100%;border-radius:50%;
   box-shadow:0 0 120px rgba(139,108,240,.3),0 0 260px rgba(79,195,255,.14)}
+#aura-figure{position:absolute;left:50%;top:50%;width:62%;height:62%;
+  transform:translate(-50%,-47%);pointer-events:none}
 #aura-legend{display:flex;gap:2.2rem;justify-content:center;flex-wrap:wrap;margin-top:2.6rem}
 #aura-legend .chip{display:flex;align-items:center;gap:.7rem;font-size:.68rem;
   letter-spacing:.26em;text-transform:uppercase;color:var(--silver-dim)}
@@ -266,6 +268,27 @@ section{position:relative;z-index:2}
 footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:flex;
   justify-content:space-between;gap:1.5rem;flex-wrap:wrap;font-size:.64rem;letter-spacing:.26em;
   text-transform:uppercase;color:var(--silver-dim);border-top:1px solid var(--glass-line)}
+
+#join-free{background:none;border:none;color:var(--pulsar);font-family:inherit;font-size:inherit;
+  padding:0;border-bottom:1px solid rgba(79,195,255,.4);transition:border-color .4s}
+#join-free:hover{border-color:var(--flare)}
+#sub-modal{position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:1.4rem}
+#sub-modal[hidden]{display:none}
+#sub-backdrop{position:absolute;inset:0;background:rgba(5,3,16,.78);backdrop-filter:blur(6px)}
+.sub-card{position:relative;max-width:480px;width:100%;padding:3rem 2.6rem;text-align:center;
+  animation:subin .6s var(--ease-lux)}
+@keyframes subin{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+.sub-card h3{font-size:2.2rem;margin-bottom:.8rem}
+.sub-card>p{font-size:.88rem;color:var(--silver-dim)}
+#sub-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--silver-dim);
+  font-size:1.6rem;line-height:1;padding:.2rem}
+#sub-close:hover{color:var(--flare)}
+#sub-form{display:flex;gap:.8rem;margin-top:1.8rem}
+@media(max-width:460px){#sub-form{flex-direction:column}}
+#sub-email{flex:1;background:rgba(5,3,16,.6);border:1px solid var(--glass-line);border-radius:12px;
+  padding:1rem 1.1rem;color:var(--silver);font-family:inherit;font-size:.95rem;outline:none;color-scheme:dark}
+#sub-email:focus{border-color:var(--pulsar)}
+#sub-status{margin-top:1.1rem;font-size:.78rem;min-height:1.2em;color:var(--pulsar)}
 
 /* ---------- perf: small screens ---------- */
 @media(max-width:820px){
@@ -446,7 +469,17 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
     <p class="lede" style="margin-inline:auto;text-align:center">The elemental balance of your chart,
       rendered as a living iridescent field — fire to flare, water to pulsar, air to silver,
       earth to deep violet.</p>
-    <div id="aura-canvas-wrap"><canvas id="aura-canvas" width="640" height="640"></canvas></div>
+    <div id="aura-canvas-wrap"><canvas id="aura-canvas" width="640" height="640"></canvas>
+      <svg id="aura-figure" viewBox="-220 -220 440 440" aria-label="Meditating figure within your elemental spectrum">
+        <g fill="#050310" stroke="rgba(233,230,244,.28)" stroke-width="1.5">
+          <ellipse cx="0" cy="-128" rx="30" ry="35"/>
+          <path d="M -14,-98 C -18,-88 -30,-82 -44,-74 C -62,-63 -72,-44 -76,-22 C -80,-2 -84,18 -96,34 C -108,50 -122,58 -130,72 C -134,80 -130,88 -120,88 L 120,88 C 130,88 134,80 130,72 C 122,58 108,50 96,34 C 84,18 80,-2 76,-22 C 72,-44 62,-63 44,-74 C 30,-82 18,-88 14,-98 Z"/>
+          <path d="M -150,96 C -150,74 -120,58 -88,52 C -50,45 -18,52 0,58 C 18,52 50,45 88,52 C 120,58 150,74 150,96 C 150,110 136,116 118,116 L -118,116 C -136,116 -150,110 -150,96 Z"/>
+          <ellipse cx="-96" cy="44" rx="16" ry="10"/>
+          <ellipse cx="96" cy="44" rx="16" ry="10"/>
+        </g>
+      </svg>
+    </div>
     <div id="aura-legend">
       <div class="chip" style="color:#ff8a3c"><i style="background:#ff8a3c"></i><span id="el-fire">Fire —</span></div>
       <div class="chip" style="color:#4fc3ff"><i style="background:#4fc3ff"></i><span id="el-water">Water —</span></div>
@@ -496,9 +529,24 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
     </div>
     <p class="lede" style="margin-inline:auto;text-align:center;margin-top:3rem;font-size:.85rem">
       Or begin with the free weekly forecast — one short, well-written email every Sunday.
-      <a href="mailto:hello@beacongaze.com?subject=Join%20the%20weekly%20forecast" style="color:var(--pulsar)">Join free.</a></p>
+      <button id="join-free" type="button">Join free.</button></p>
   </div>
 </section>
+
+<div id="sub-modal" role="dialog" aria-modal="true" aria-labelledby="sub-title" hidden>
+  <div id="sub-backdrop"></div>
+  <div class="sub-card glass">
+    <button id="sub-close" aria-label="Close">&times;</button>
+    <div class="eyebrow" style="justify-content:center">The Weekly Forecast</div>
+    <h3 id="sub-title" class="serif">One sky, every Sunday.</h3>
+    <p>The week's transits, one reflection prompt, zero spam. Unsubscribe anytime with one click.</p>
+    <form id="sub-form">
+      <input id="sub-email" type="email" required placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+      <button class="cta-reserve" type="submit"><span id="sub-btn-label">Join Free</span></button>
+    </form>
+    <p id="sub-status" aria-live="polite"></p>
+  </div>
+</div>
 
 <footer>
   <span>BeaconGaze · MMXXVI</span>
@@ -831,42 +879,77 @@ setInterval(updateTelemetry, 30000);
    ========================================================= */
 const auraCv = document.getElementById("aura-canvas"), actx = auraCv.getContext("2d");
 const AURA_COLORS = { Fire: [255, 138, 60], Water: [79, 195, 255], Air: [233, 230, 244], Earth: [139, 108, 240] };
-let auraBlobs = [];
+let auraRays = [], auraCore = [139, 108, 240], auraHalos = [];
 function paintAura(chart) {
-  auraBlobs = [];
-  const total = 7;
+  /* rays: 72 spokes distributed by elemental weight — the chart literally
+     becomes the light radiating from behind the figure */
+  auraRays = []; auraHalos = [];
+  const pool = [];
   Object.entries(chart.elements).forEach(([elName, count]) => {
-    for (let i = 0; i < count; i++) {
-      auraBlobs.push({
-        c: AURA_COLORS[elName],
-        r: 130 + Math.random() * 190,
-        a: Math.random() * TAU,
-        d: 70 + Math.random() * 190,
-        sp: (0.05 + Math.random() * 0.12) * (Math.random() < .5 ? -1 : 1),
-        w: count / total
-      });
-    }
+    for (let i = 0; i < count; i++) pool.push(AURA_COLORS[elName]);
+  });
+  const RAYS = 72;
+  for (let i = 0; i < RAYS; i++) {
+    auraRays.push({
+      a: (i / RAYS) * TAU + (Math.random() - .5) * .04,
+      c: pool[(Math.random() * pool.length) | 0],
+      w: .006 + Math.random() * .016,          // angular width
+      len: .55 + Math.random() * .45,           // reach (fraction of radius)
+      tw: .5 + Math.random() * 1.4              // twinkle rate
+    });
+  }
+  /* dominant element drives the core glow; each element gets a soft halo ring */
+  const dominant = Object.entries(chart.elements).sort((a, b) => b[1] - a[1])[0][0];
+  auraCore = AURA_COLORS[dominant];
+  let ri = 0;
+  Object.entries(chart.elements).forEach(([elName, count]) => {
+    if (count > 0) auraHalos.push({ c: AURA_COLORS[elName], r: .34 + ri * .16, w: count / 7 });
+    ri++;
   });
 }
 let auraT = 0;
 function drawAura() {
-  auraT += PREFERS_STILL ? 0 : 0.006;
-  const W = auraCv.width, H = auraCv.height;
+  auraT += PREFERS_STILL ? 0 : 0.008;
+  const W = auraCv.width, H = auraCv.height, R = W / 2;
   actx.clearRect(0, 0, W, H);
   actx.save();
-  actx.beginPath(); actx.arc(W / 2, H / 2, W / 2 - 2, 0, TAU); actx.clip();
+  actx.beginPath(); actx.arc(R, R, R - 2, 0, TAU); actx.clip();
   actx.fillStyle = "#050310"; actx.fillRect(0, 0, W, H);
   actx.globalCompositeOperation = "lighter";
-  auraBlobs.forEach(b => {
-    const x = W / 2 + Math.cos(b.a + auraT * b.sp * 10) * b.d;
-    const y = H / 2 + Math.sin(b.a * 1.3 + auraT * b.sp * 8) * b.d;
-    const g = actx.createRadialGradient(x, y, 0, x, y, b.r);
-    const [r, gg, bb] = b.c;
-    g.addColorStop(0, `rgba(${r},${gg},${bb},${0.16 + b.w * 0.12})`);
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    actx.fillStyle = g;
-    actx.beginPath(); actx.arc(x, y, b.r, 0, TAU); actx.fill();
+  /* radiant burst */
+  const rot = auraT * .12;
+  auraRays.forEach(ray => {
+    const tw = .5 + .5 * Math.sin(auraT * ray.tw * 2 + ray.a * 7);
+    const [r, g, b] = ray.c;
+    const a0 = ray.a + rot, len = R * ray.len * (0.92 + .08 * tw);
+    const grad = actx.createLinearGradient(R, R, R + Math.cos(a0) * len, R + Math.sin(a0) * len);
+    grad.addColorStop(0, `rgba(${r},${g},${b},${.34 * tw + .1})`);
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    actx.fillStyle = grad;
+    actx.beginPath();
+    actx.moveTo(R, R);
+    actx.arc(R, R, len, a0 - ray.w, a0 + ray.w);
+    actx.closePath(); actx.fill();
   });
+  /* elemental halo rings */
+  auraHalos.forEach(h => {
+    const [r, g, b] = h.c;
+    const rad = R * h.r * (1 + .02 * Math.sin(auraT + h.r * 9));
+    const grad = actx.createRadialGradient(R, R, rad * .72, R, R, rad);
+    grad.addColorStop(0, "rgba(0,0,0,0)");
+    grad.addColorStop(.82, `rgba(${r},${g},${b},${.1 + h.w * .16})`);
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    actx.fillStyle = grad;
+    actx.beginPath(); actx.arc(R, R, rad, 0, TAU); actx.fill();
+  });
+  /* luminous core behind the figure, tinted by the dominant element */
+  const [cr, cg, cb] = auraCore;
+  const core = actx.createRadialGradient(R, R * .96, 0, R, R * .96, R * .55);
+  core.addColorStop(0, "rgba(255,252,244,.85)");
+  core.addColorStop(.25, `rgba(${cr},${cg},${cb},.5)`);
+  core.addColorStop(1, "rgba(0,0,0,0)");
+  actx.fillStyle = core;
+  actx.beginPath(); actx.arc(R, R * .96, R * .55, 0, TAU); actx.fill();
   actx.restore();
 }
 
@@ -1197,6 +1280,50 @@ function finishLoad() {
 }
 addEventListener("load", () => setTimeout(finishLoad, 1400));
 setTimeout(finishLoad, 6000); /* hard failsafe */
+
+/* =========================================================
+   8 · WEEKLY FORECAST SIGNUP
+   Emails are POSTed to SIGNUP_ENDPOINT — a tiny Cloudflare
+   Worker (scripts/subscribe-worker.js) that commits each
+   address to the private repo via the GitHub API. The token
+   lives ONLY in the worker; never put it in this page.
+   Until the worker is deployed, falls back to a prefilled
+   email so no signup is ever lost. */
+const SIGNUP_ENDPOINT = ""; // e.g. "https://beacongaze-subscribe.<you>.workers.dev"
+const subModal = document.getElementById("sub-modal");
+function openSub() { subModal.hidden = false; document.getElementById("sub-email").focus(); }
+function closeSub() { subModal.hidden = true; }
+document.getElementById("join-free").addEventListener("click", openSub);
+document.getElementById("sub-close").addEventListener("click", closeSub);
+document.getElementById("sub-backdrop").addEventListener("click", closeSub);
+addEventListener("keydown", e => { if (e.key === "Escape" && !subModal.hidden) closeSub(); });
+document.getElementById("sub-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = document.getElementById("sub-email").value.trim();
+  const status = document.getElementById("sub-status");
+  const label = document.getElementById("sub-btn-label");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status.textContent = "That address doesn't look complete."; return; }
+  if (!SIGNUP_ENDPOINT) {
+    location.href = "mailto:hello@beacongaze.com?subject=Join%20the%20weekly%20forecast&body=" +
+      encodeURIComponent("Please add me to the weekly forecast: " + email);
+    status.textContent = "Opening your mail app to confirm\u2026";
+    return;
+  }
+  label.textContent = "Casting\u2026";
+  try {
+    const r = await fetch(SIGNUP_ENDPOINT, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, ts: new Date().toISOString(), source: "beacongaze.com" })
+    });
+    if (!r.ok) throw new Error(r.status);
+    label.textContent = "Joined";
+    status.textContent = "Welcome. Your first forecast arrives Sunday.";
+    setTimeout(closeSub, 2200);
+  } catch (err) {
+    label.textContent = "Join Free";
+    status.textContent = "The signal didn't get through — try again in a moment.";
+  }
+});
 
 /* boot the default chart so the story has a protagonist immediately */
 castChart(false);

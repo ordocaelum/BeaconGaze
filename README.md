@@ -40,3 +40,17 @@ sidereal time, equal houses, major aspects with orbs, elemental spectrum.
 - `index.html`   — the entire experience (styles, markup, engine)
 - `scripts/slice-frames.sh` — footage -> scroll-frame pipeline (ffmpeg)
 - `design-brief.md` — the locked design contract
+
+## Weekly forecast signups (stored in your repo)
+The "Join free" button opens an email modal. Addresses POST to `SIGNUP_ENDPOINT`
+(top of the inline script). Deploy `scripts/subscribe-worker.js` on Cloudflare
+Workers (free) with a fine-grained GitHub token as a secret — it appends each
+email to `data/subscribers.csv` in the private repo. Setup steps are in the
+worker file header. Never place a GitHub token in index.html: view-source
+exposes it even when the repo is private. Until the worker is live, the modal
+falls back to a prefilled email so no signup is lost.
+
+## Stripe
+Each pricing tier is a plain anchor. To wire payments, create three Stripe
+Payment Links and replace the three mailto hrefs in the Claim Your Destiny
+section — no other changes needed.
