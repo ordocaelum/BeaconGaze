@@ -64,13 +64,13 @@ body.cursor-active #cursor-halo{width:74px;height:74px;border-color:var(--flare)
 
 /* ---------- fixed layers ---------- */
 #cosmos{position:fixed;inset:0;z-index:0;pointer-events:none}
-#grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+#grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.035;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 /* ---------- nav ---------- */
 nav{position:fixed;top:0;left:0;right:0;z-index:800;display:flex;align-items:center;
   justify-content:space-between;padding:1.4rem clamp(1.4rem,5vw,4rem);
-  backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+  backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2);
   background:linear-gradient(180deg,rgba(5,3,16,.72),rgba(5,3,16,.18));
   border-bottom:1px solid var(--glass-line);
   transform:translateY(-110%);transition:transform 1s var(--ease-lux)}
@@ -101,7 +101,7 @@ section{position:relative;z-index:2}
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .lede{max-width:46ch;color:var(--silver-dim);font-size:clamp(.95rem,1.3vw,1.12rem);margin-top:1.8rem}
 .glass{background:var(--glass);border:1px solid var(--glass-line);border-radius:18px;
-  backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25);
+  backdrop-filter:blur(12px) saturate(1.2);-webkit-backdrop-filter:blur(12px) saturate(1.2);
   box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(233,230,244,.08)}
 .split-line{display:block;overflow:hidden}
 .split-line span{display:block;transform:translateY(0)}
@@ -109,13 +109,13 @@ section{position:relative;z-index:2}
 /* ---------- 1 · hero ---------- */
 #nexus{height:100vh;padding:0;position:relative;overflow:hidden}
 #hero-stage{position:absolute;inset:0}
-#hero-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+#hero-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:contents;
   opacity:0;transition:opacity 1.6s ease;filter:saturate(1.12) contrast(1.05)}
 #hero-film.live{opacity:.92}
 #hero-veil{position:absolute;inset:0;
   background:radial-gradient(120% 90% at 50% 110%,rgba(5,3,16,.92) 0%,rgba(5,3,16,.35) 45%,rgba(5,3,16,.15) 70%),
   linear-gradient(180deg,rgba(5,3,16,.55),transparent 30%,transparent 60%,rgba(5,3,16,.96))}
-#hero-copy{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+#hero-copy{position:absolute;inset:0;will-change:transform;display:flex;flex-direction:column;align-items:center;
   justify-content:center;text-align:center;padding:0 1.5rem;z-index:4}
 #hero-copy .house{font-size:.7rem;letter-spacing:.6em;text-indent:.6em;text-transform:uppercase;
   color:var(--silver-dim);margin-bottom:2rem}
@@ -131,7 +131,7 @@ section{position:relative;z-index:2}
 .cta-descent{margin-top:3rem;position:relative;display:inline-flex;align-items:center;gap:1rem;
   padding:1.05rem 2.6rem;border-radius:100px;border:1px solid rgba(233,230,244,.28);
   font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--silver);
-  background:rgba(10,6,32,.35);backdrop-filter:blur(10px);overflow:hidden;transition:border-color .5s}
+  background:rgba(10,6,32,.35);overflow:hidden;transition:border-color .5s}
 .cta-descent i{width:6px;height:6px;border-radius:50%;background:var(--flare);
   box-shadow:0 0 12px var(--flare);animation:orbit-dot 3.4s linear infinite}
 @keyframes orbit-dot{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
@@ -146,7 +146,7 @@ section{position:relative;z-index:2}
   gap:clamp(2.5rem,6vw,6rem);align-items:center;width:100%;max-width:1440px;margin:0 auto}
 @media(max-width:960px){#blueprint .grid{grid-template-columns:1fr}}
 #wheel-wrap{position:relative;aspect-ratio:1;max-width:640px;margin:0 auto;width:100%}
-#natal-wheel{width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(139,108,240,.25))}
+#natal-wheel{width:100%;height:100%;will-change:transform}
 #wheel-glow{position:absolute;inset:-12%;border-radius:50%;pointer-events:none;
   background:radial-gradient(50% 50% at 50% 50%,rgba(139,108,240,.16),rgba(79,195,255,.05) 55%,transparent 75%)}
 .birth-form{margin-top:2.4rem;padding:1.8rem;display:grid;gap:1rem}
@@ -177,7 +177,7 @@ section{position:relative;z-index:2}
   border:1px solid var(--glass-line);border-radius:18px;overflow:hidden;max-width:1200px;
   width:100%;margin:3.5rem auto 0}
 @media(max-width:860px){.metric-band{grid-template-columns:repeat(2,1fr)}}
-.metric{padding:2.2rem 1.8rem;background:rgba(8,5,24,.72);backdrop-filter:blur(16px)}
+.metric{padding:2.2rem 1.8rem;background:rgba(8,5,24,.72);backdrop-filter:blur(8px)}
 .metric b{display:block;font-family:'Cormorant Garamond',serif;font-weight:300;
   font-size:clamp(2.2rem,4.5vw,3.6rem);line-height:1;font-variant-numeric:tabular-nums}
 .metric span{display:block;margin-top:.7rem;font-size:.62rem;letter-spacing:.3em;
@@ -267,6 +267,11 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
   justify-content:space-between;gap:1.5rem;flex-wrap:wrap;font-size:.64rem;letter-spacing:.26em;
   text-transform:uppercase;color:var(--silver-dim);border-top:1px solid var(--glass-line)}
 
+/* ---------- perf: small screens ---------- */
+@media(max-width:820px){
+  .glass,nav,.metric{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,6,30,.82)}
+  #grain{display:none}
+}
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
@@ -441,7 +446,7 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
     <p class="lede" style="margin-inline:auto;text-align:center">The elemental balance of your chart,
       rendered as a living iridescent field — fire to flare, water to pulsar, air to silver,
       earth to deep violet.</p>
-    <div id="aura-canvas-wrap"><canvas id="aura-canvas" width="900" height="900"></canvas></div>
+    <div id="aura-canvas-wrap"><canvas id="aura-canvas" width="640" height="640"></canvas></div>
     <div id="aura-legend">
       <div class="chip" style="color:#ff8a3c"><i style="background:#ff8a3c"></i><span id="el-fire">Fire —</span></div>
       <div class="chip" style="color:#4fc3ff"><i style="background:#4fc3ff"></i><span id="el-water">Water —</span></div>
@@ -870,7 +875,8 @@ function drawAura() {
    ========================================================= */
 const cosmos = document.getElementById("cosmos");
 const renderer = new THREE.WebGLRenderer({ canvas: cosmos, antialias: false, alpha: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const IS_MOBILE = innerWidth < 820 || navigator.hardwareConcurrency <= 4;
+renderer.setPixelRatio(Math.min(devicePixelRatio, IS_MOBILE ? 1.25 : 1.5));
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x050310, 0.016);
 const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.1, 400);
@@ -889,7 +895,7 @@ function starTexture(color) {
 const PALETTE = ["rgba(139,108,240,.9)", "rgba(79,195,255,.9)", "rgba(255,138,60,.9)", "rgba(233,230,244,.9)"];
 const dustGroups = [];
 PALETTE.forEach((col, gi) => {
-  const N = gi === 3 ? 2600 : 900;
+  const N = Math.round((gi === 3 ? 2600 : 900) * (IS_MOBILE ? 0.45 : 1));
   const pos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
     pos[i * 3] = (Math.random() - .5) * 240;
@@ -910,16 +916,17 @@ PALETTE.forEach((col, gi) => {
 const constGroup = new THREE.Group(); scene.add(constGroup);
 const lineMat = new THREE.LineBasicMaterial({ color: 0xe9e6f4, transparent: true, opacity: 0.16 });
 const nodeMat = new THREE.PointsMaterial({ size: 2.4, map: starTexture("rgba(233,230,244,.95)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+const segVerts = [], nodeVerts = [];
 for (let k = 0; k < 14; k++) {
   const cx = (Math.random() - .5) * 200, cy = (Math.random() - .5) * 110, cz = -20 - Math.random() * 280;
   const n = 4 + Math.floor(Math.random() * 4);
-  const verts = [];
-  for (let i = 0; i < n; i++) verts.push(new THREE.Vector3(cx + (Math.random() - .5) * 26, cy + (Math.random() - .5) * 18, cz + (Math.random() - .5) * 8));
-  const lineGeo = new THREE.BufferGeometry().setFromPoints(verts);
-  constGroup.add(new THREE.Line(lineGeo, lineMat));
-  const pGeo = new THREE.BufferGeometry().setFromPoints(verts);
-  constGroup.add(new THREE.Points(pGeo, nodeMat));
+  const pts = [];
+  for (let i = 0; i < n; i++) pts.push(new THREE.Vector3(cx + (Math.random() - .5) * 26, cy + (Math.random() - .5) * 18, cz + (Math.random() - .5) * 8));
+  for (let i = 0; i < n - 1; i++) segVerts.push(pts[i], pts[i + 1]);
+  nodeVerts.push(...pts);
 }
+constGroup.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(segVerts), lineMat));
+constGroup.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(nodeVerts), nodeMat));
 /* distant glossy planet */
 const planet = new THREE.Mesh(
   new THREE.SphereGeometry(9, 48, 48),
@@ -938,7 +945,7 @@ function sizeAll() {
   renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   const ac = document.getElementById("align-canvas");
-  ac.width = ac.clientWidth; ac.height = ac.clientHeight;
+  ac.width = Math.round(ac.clientWidth * .5); ac.height = Math.round(ac.clientHeight * .5);
 }
 addEventListener("resize", sizeAll); sizeAll();
 
@@ -963,8 +970,17 @@ function drawAlignPlate(t) {
   alx.globalCompositeOperation = "source-over";
 }
 
+/* paint only what is on screen */
+const visible = { aura: false, align: false };
+new IntersectionObserver(es => es.forEach(e => visible.aura = e.isIntersecting), { rootMargin: "80px" })
+  .observe(document.getElementById("aura-canvas-wrap"));
+new IntersectionObserver(es => es.forEach(e => visible.align = e.isIntersecting), { rootMargin: "80px" })
+  .observe(document.getElementById("align-film-frame"));
+
 let T0 = performance.now();
 function frame(now) {
+  requestAnimationFrame(frame);
+  if (document.hidden) return;
   const t = (now - T0) / 1000;
   if (!PREFERS_STILL) {
     camera.position.x += (mouseX * 7 - camera.position.x) * .04;
@@ -976,9 +992,8 @@ function frame(now) {
     dustGroups.forEach((g, i) => { g.rotation.z = t * .004 * (i % 2 ? 1 : -1); });
   }
   renderer.render(scene, camera);
-  drawAura();
-  drawAlignPlate(t);
-  requestAnimationFrame(frame);
+  if (visible.aura) drawAura();
+  if (visible.align) drawAlignPlate(t);
 }
 requestAnimationFrame(frame);
 
@@ -1050,14 +1065,18 @@ function mountSectionFilm(url, frameSel, scrubTrigger) {
   v.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.4s";
   frame.prepend(v);
   /* lazy-load: only fetch when the section approaches the viewport */
-  new IntersectionObserver((es, obs) => {
+  let mounted = false;
+  new IntersectionObserver(es => {
     es.forEach(en => {
-      if (!en.isIntersecting) return;
-      v.src = url; v.load();
-      v.addEventListener("loadeddata", () => { v.style.opacity = ".55"; v.play().catch(() => {}); });
-      obs.disconnect();
+      if (en.isIntersecting) {
+        if (!mounted) {
+          mounted = true; v.src = url; v.load();
+          v.addEventListener("loadeddata", () => { v.style.opacity = ".55"; });
+        }
+        v.play().catch(() => {});
+      } else if (mounted) { v.pause(); }
     });
-  }, { rootMargin: "600px" }).observe(frame);
+  }, { rootMargin: "300px" }).observe(frame);
   if (scrubTrigger && !PREFERS_STILL) {
     let tgt = 0, curT = 0;
     ScrollTrigger.create({ trigger: scrubTrigger, start: "top bottom", end: "bottom top", scrub: true,
@@ -1070,13 +1089,19 @@ ScrollTrigger.create({
   trigger: "#nexus", start: "top top", end: "bottom top", scrub: true,
   onUpdate: self => { filmTarget = self.progress; }
 });
+let heroInView = true, seekPending = false;
+new IntersectionObserver(es => { heroInView = es[0].isIntersecting; }).observe(document.getElementById("nexus"));
+film.addEventListener("seeked", () => { seekPending = false; });
 (function scrubLoop() {
   filmCurrent += (filmTarget - filmCurrent) * .12;
   if (frameMode) {
-    drawFrame(Math.max(0, Math.min(1, filmCurrent)));
-  } else if (filmReady && film.duration) {
+    if (heroInView) drawFrame(Math.max(0, Math.min(1, filmCurrent)));
+  } else if (filmReady && film.duration && heroInView && !seekPending) {
     const t = Math.min(film.duration - .05, Math.max(0, filmCurrent * film.duration));
-    if (Math.abs(film.currentTime - t) > 0.02) film.currentTime = t;
+    if (Math.abs(film.currentTime - t) > 0.045) {
+      seekPending = true;
+      if (film.fastSeek) film.fastSeek(t); else film.currentTime = t;
+    }
   }
   requestAnimationFrame(scrubLoop);
 })();
@@ -1136,14 +1161,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click
 const cur = document.getElementById("cursor"), halo = document.getElementById("cursor-halo");
 let hx = innerWidth / 2, hy = innerHeight / 2;
 addEventListener("pointermove", e => {
-  cur.style.left = e.clientX + "px"; cur.style.top = e.clientY + "px";
-  hx += (e.clientX - hx); hy += (e.clientY - hy);
-});
+  cur.style.transform = `translate(${e.clientX}px,${e.clientY}px) translate(-50%,-50%)`;
+  hx = e.clientX; hy = e.clientY;
+}, { passive: true });
+let haloX = innerWidth / 2, haloY = innerHeight / 2;
 (function haloLoop() {
-  const r = halo.getBoundingClientRect();
-  const cx = parseFloat(halo.style.left || innerWidth / 2), cy = parseFloat(halo.style.top || innerHeight / 2);
-  halo.style.left = cx + (hx - cx) * .16 + "px";
-  halo.style.top = cy + (hy - cy) * .16 + "px";
+  haloX += (hx - haloX) * .16;
+  haloY += (hy - haloY) * .16;
+  halo.style.transform = `translate(${haloX}px,${haloY}px) translate(-50%,-50%)`;
   requestAnimationFrame(haloLoop);
 })();
 document.querySelectorAll("a,button,input,select").forEach(n => {
