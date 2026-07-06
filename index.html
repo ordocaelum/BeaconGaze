@@ -513,18 +513,18 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
       <div class="tier glass">
         <h3>Basic Reading</h3><b>$14.99</b>
         <p>Sun sign &amp; moon phase reading · core archetype profile · elemental balance · delivered by email in minutes.</p>
-        <a class="cta-kit" href="mailto:hello@beacongaze.com?subject=Basic%20Reading%20—%20%2414.99">Get Basic</a>
+        <a class="cta-kit tier-cta" data-tier="basic" href="mailto:hello@beacongaze.com?subject=Basic%20Reading%20—%20%2414.99">Get Basic</a>
       </div>
       <div class="tier glass tier-hot">
         <div class="tier-flag">Most chosen</div>
         <h3>Full Report</h3><b>$24.99</b>
         <p>Everything in Basic · season-ahead forecast (3 months) · compatibility by element · printable chart wheel PDF.</p>
-        <a class="cta-reserve" href="mailto:hello@beacongaze.com?subject=Full%20Report%20—%20%2424.99"><span>Get Full Report</span></a>
+        <a class="cta-reserve tier-cta" data-tier="full" href="mailto:hello@beacongaze.com?subject=Full%20Report%20—%20%2424.99"><span>Get Full Report</span></a>
       </div>
       <div class="tier glass">
         <h3>Premium Blueprint</h3><b>$49.99</b>
         <p>Everything in Full · original archetype artwork · 12-month cosmic forecast · priority delivery &amp; keepsake PDF.</p>
-        <a class="cta-kit" href="mailto:hello@beacongaze.com?subject=Premium%20Blueprint%20—%20%2449.99">Get Premium</a>
+        <a class="cta-kit tier-cta" data-tier="premium" href="mailto:hello@beacongaze.com?subject=Premium%20Blueprint%20—%20%2449.99">Get Premium</a>
       </div>
     </div>
     <p class="lede" style="margin-inline:auto;text-align:center;margin-top:3rem;font-size:.85rem">
@@ -565,10 +565,25 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
    ========================================================= */
 "use strict";
 
-/* ---------- cinematic sequence manifest ----------
-   hero: Higgsfield Cinema Studio sequence (scroll-scrubbed).
-   blueprint / alignments: additional sequences — drop URLs in
-   as they are generated; procedural cosmos covers them until then. */
+/* =========================================================
+   0 · INTEGRATION CONFIG — the only lines you edit
+   ========================================================= */
+/* Newsletter capture endpoint. Paste a Make.com Custom Webhook URL here
+   (Webhooks -> Custom webhook -> copy address). The modal POSTs
+   {email, ts, source} as JSON. Until set, falls back to mailto. */
+const SIGNUP_ENDPOINT = "";
+
+/* Stripe Payment Links — create one per tier in the Stripe dashboard
+   (Payment Links -> New) and paste them here. The site automatically
+   appends prefilled_email and client_reference_id from the visitor's
+   URL parameters, so checkout arrives pre-filled and the webhook can
+   trace the purchase back to the quiz response. */
+const STRIPE_LINKS = {
+  basic:   "",   // e.g. "https://buy.stripe.com/xxxx"
+  full:    "",
+  premium: ""
+};
+
 const SEQUENCES = {
   hero: "https://d8j0ntlcm91z4.cloudfront.net/user_3G5s1BGkpgI3l1huxncd9ginzq8/hf_20260705_174559_a25bd8e7-e7b0-483b-8b38-15611bdecbfb.mp4",
   alignments: "https://d8j0ntlcm91z4.cloudfront.net/user_3G5s1BGkpgI3l1huxncd9ginzq8/hf_20260705_183546_4da584c3-c27e-4d1e-8bae-4f9b85f51f2b.mp4",
@@ -1283,13 +1298,9 @@ setTimeout(finishLoad, 6000); /* hard failsafe */
 
 /* =========================================================
    8 · WEEKLY FORECAST SIGNUP
-   Emails are POSTed to SIGNUP_ENDPOINT — a tiny Cloudflare
-   Worker (scripts/subscribe-worker.js) that commits each
-   address to the private repo via the GitHub API. The token
-   lives ONLY in the worker; never put it in this page.
-   Until the worker is deployed, falls back to a prefilled
-   email so no signup is ever lost. */
-const SIGNUP_ENDPOINT = ""; // e.g. "https://beacongaze-subscribe.<you>.workers.dev"
+   Emails POST as JSON to SIGNUP_ENDPOINT (see INTEGRATION
+   CONFIG at the top — a Make.com Custom Webhook URL works
+   directly). Falls back to a prefilled email until set. */
 const subModal = document.getElementById("sub-modal");
 function openSub() { subModal.hidden = false; document.getElementById("sub-email").focus(); }
 function closeSub() { subModal.hidden = true; }
@@ -1325,8 +1336,53 @@ document.getElementById("sub-form").addEventListener("submit", async e => {
   }
 });
 
+/* =========================================================
+   9 · URL PARAMETERS — the results email personalizes the site
+   Link format (from the Make.com Gmail step):
+   https://beacongaze.com/?name=Orion&date=1994-08-17&time=04:44
+     &tz=-5&lat=40.7128&lon=-74.0060&email=orion@example.com&ref=TALLY_RESPONSE_ID
+   date/time/tz/lat/lon prefill the instrument and auto-cast, so the
+   visitor arrives to a site already telling THEIR story. email + ref
+   ride along onto the Stripe links for a pre-filled, traceable checkout. */
+const Q = new URLSearchParams(location.search);
+let VISITOR_EMAIL = (Q.get("email") || "").trim();
+const VISITOR_REF = (Q.get("ref") || "").trim();
+(function hydrateFromURL() {
+  const map = { name: "bf-name", date: "bf-date", time: "bf-time", lat: "bf-lat", lon: "bf-lon" };
+  let touched = false;
+  for (const [param, id] of Object.entries(map)) {
+    const v = Q.get(param);
+    if (v) { document.getElementById(id).value = v; touched = true; }
+  }
+  const tz = Q.get("tz");
+  if (tz !== null && [...tzSel.options].some(o => o.value === String(parseFloat(tz)))) {
+    tzSel.value = String(parseFloat(tz)); touched = true;
+  }
+  if (VISITOR_EMAIL) {
+    const se = document.getElementById("sub-email");
+    if (se) se.value = VISITOR_EMAIL;
+  }
+  return touched;
+})();
+
+/* Stripe tier links: use configured Payment Links, carrying identity through */
+document.querySelectorAll(".tier-cta").forEach(a => {
+  const link = STRIPE_LINKS[a.dataset.tier];
+  if (!link) return; // mailto fallback stays until links are pasted in
+  const u = new URL(link);
+  if (VISITOR_EMAIL) u.searchParams.set("prefilled_email", VISITOR_EMAIL);
+  if (VISITOR_REF) u.searchParams.set("client_reference_id", VISITOR_REF);
+  a.href = u.toString();
+  a.target = "_blank"; a.rel = "noopener";
+});
+
 /* boot the default chart so the story has a protagonist immediately */
 castChart(false);
+if (Q.get("date")) {
+  /* arriving from the results email: their sky is already cast */
+  document.getElementById("spec-name").textContent =
+    (Q.get("name") ? Q.get("name") + "\u2019s" : "your") + " sky.";
+}
 updateTelemetry();
 ScrollTrigger.refresh();
 </script>
