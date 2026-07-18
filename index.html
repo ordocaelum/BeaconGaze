@@ -339,6 +339,31 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
 #sub-email:focus{border-color:var(--pulsar)}
 #sub-status{margin-top:1.1rem;font-size:.78rem;min-height:1.2em;color:var(--pulsar)}
 
+/* ---------- pre-checkout reading order modal ---------- */
+#order-modal{position:fixed;inset:0;z-index:950;display:flex;align-items:center;justify-content:center;padding:1.4rem;overflow-y:auto}
+#order-modal[hidden]{display:none}
+#order-backdrop{position:absolute;inset:0;background:rgba(5,3,16,.78);backdrop-filter:blur(6px)}
+.order-card{position:relative;max-width:560px;width:100%;padding:2.8rem 2.4rem;margin:auto;
+  animation:subin .6s var(--ease-lux)}
+.order-card h3{font-size:2rem;margin-bottom:.4rem}
+.order-card .tierline{font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--flare);margin-bottom:1rem}
+.order-card>p{font-size:.85rem;color:var(--silver-dim)}
+#order-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--silver-dim);
+  font-size:1.6rem;line-height:1;padding:.2rem}
+#order-close:hover{color:var(--flare)}
+#order-form{margin-top:1.6rem;display:grid;grid-template-columns:1fr 1fr;gap:.9rem;text-align:left}
+#order-form .of-full{grid-column:1/-1}
+#order-form label{display:block;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--silver-dim);margin-bottom:.35rem}
+#order-form input,#order-form select{width:100%;background:rgba(5,3,16,.6);border:1px solid var(--glass-line);
+  border-radius:12px;padding:.85rem 1rem;color:var(--silver);font-family:inherit;font-size:.92rem;
+  outline:none;color-scheme:dark}
+#order-form input:focus,#order-form select:focus{border-color:var(--pulsar)}
+#order-form .cta-reserve{grid-column:1/-1;margin-top:.4rem}
+#order-status{grid-column:1/-1;font-size:.76rem;min-height:1.1em;color:var(--pulsar);text-align:center}
+.order-finality{grid-column:1/-1;font-size:.68rem;color:var(--silver-dim);line-height:1.5}
+@media(max-width:520px){#order-form{grid-template-columns:1fr}}
+
 /* ---------- perf: small screens ---------- */
 @media(max-width:820px){
   .glass,nav,.metric{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,6,30,.82)}
@@ -608,9 +633,40 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
   </div>
 </div>
 
+<div id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-title" hidden>
+  <div id="order-backdrop"></div>
+  <div class="order-card glass">
+    <button id="order-close" aria-label="Close">&times;</button>
+    <div class="eyebrow" style="justify-content:center">Before we cast</div>
+    <h3 id="order-title" class="serif">Your coordinates, first.</h3>
+    <p class="tierline" id="order-tierline">Basic Reading · $14.99</p>
+    <p>Your reading is computed from your birth sky. Thirty seconds here, then straight to secure checkout.</p>
+    <form id="order-form" autocomplete="on">
+      <div class="of-full"><label for="of-name">Name</label>
+        <input id="of-name" type="text" required maxlength="60" placeholder="Orion V." autocomplete="name"></div>
+      <div class="of-full"><label for="of-email">Email — your reading is delivered here</label>
+        <input id="of-email" type="email" required placeholder="you@example.com" autocomplete="email"></div>
+      <div><label for="of-date">Birth date</label>
+        <input id="of-date" type="date" required></div>
+      <div><label for="of-time">Birth time <span style="opacity:.6">(if known)</span></label>
+        <input id="of-time" type="time"></div>
+      <div><label for="of-place">Birth city &amp; state</label>
+        <input id="of-place" type="text" maxlength="80" placeholder="Salt Lake City, UT"></div>
+      <div><label for="of-zip">Current ZIP / postal code</label>
+        <input id="of-zip" type="text" required maxlength="12" placeholder="84101" autocomplete="postal-code"></div>
+      <p class="order-finality">Digital goods, delivered by email and generated on purchase — all sales are final.
+        By continuing you agree to immediate delivery and to our
+        <a href="/privacy.html" target="_blank" style="color:var(--pulsar)">privacy policy</a>.</p>
+      <button class="cta-reserve" type="submit"><span id="order-btn-label">Continue to Checkout</span></button>
+      <p id="order-status" aria-live="polite"></p>
+    </form>
+  </div>
+</div>
+
 <footer>
   <span>BeaconGaze · MMXXVI</span>
   <span>Charts computed locally · </span>
+  <span><a href="/privacy.html">Privacy Policy</a></span>
   <span>Crafted at 60 frames per second</span>
 </footer>
 
@@ -640,6 +696,15 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
 const SUPABASE_URL      = "https://ekjodzzcrrgatzudbvvr.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7IwzyQLfPBE5jKuwSmfkrw_kTuiVaqz";   /* ★ PASTE SUPABASE ANON API KEY HERE, BETWEEN THE QUOTES ★ */
 const SUPABASE_TABLE    = "subscribers";
+/* Orders table — pre-checkout details for website tier purchases.
+   Create it with supabase-setup.sql (repo root): needs the same
+   INSERT-only anon RLS policy as `subscribers`. */
+const SUPABASE_ORDERS_TABLE = "orders";
+const TIER_INFO = {
+  basic:   { label: "Basic Reading",     price: "14.99" },
+  full:    { label: "Full Report",       price: "24.99" },
+  premium: { label: "Premium Blueprint", price: "49.99" }
+};
 
 /* Stripe Payment Links — create one per tier in the Stripe dashboard
    (Payment Links -> New) and paste them here. The site automatically
@@ -1416,7 +1481,9 @@ document.getElementById("sub-form").addEventListener("submit", async e => {
         "Authorization": "Bearer " + SUPABASE_ANON_KEY,
         "Prefer": "return=minimal"
       },
-      body: JSON.stringify({ email: email, data_created: new Date().toISOString() })
+      /* "Source" is case-sensitive — must match the Supabase column name exactly.
+         Tally-originated rows get Source:"Tally" mapped inside the Make module. */
+      body: JSON.stringify({ email: email, data_created: new Date().toISOString(), "Source": "Website" })
     });
     if (!r.ok) throw new Error(r.status);
     label.textContent = "Joined";
@@ -1457,15 +1524,97 @@ const VISITOR_REF = (Q.get("ref") || "").trim();
   return touched;
 })();
 
-/* Stripe tier links: use configured Payment Links, carrying identity through */
+/* =========================================================
+   Stripe tier purchases.
+   Two paths:
+   A) Visitor arrived from the Tally results email (?ref= present):
+      their data is already on file — go straight to Stripe, carrying
+      prefilled_email + client_reference_id = TALLY_RESPONSE_ID.
+   B) Cold website visitor: open the order modal to capture birth
+      details, write a row to Supabase `orders` (source: website),
+      then redirect to Stripe with client_reference_id = order_ref
+      so the Make fulfillment webhook can find the row. */
+function stripeUrl(tier, email, ref) {
+  const u = new URL(STRIPE_LINKS[tier]);
+  if (email) u.searchParams.set("prefilled_email", email);
+  if (ref) u.searchParams.set("client_reference_id", ref);
+  return u.toString();
+}
+const orderModal = document.getElementById("order-modal");
+let ORDER_TIER = "basic";
+function openOrder(tier) {
+  ORDER_TIER = tier;
+  const t = TIER_INFO[tier];
+  document.getElementById("order-tierline").textContent = t.label + " \u00B7 $" + t.price;
+  /* prefill from URL params or anything typed into the natal instrument */
+  const pre = (id, v) => { const el = document.getElementById(id); if (v && !el.value) el.value = v; };
+  pre("of-name",  Q.get("name") || document.getElementById("bf-name").value);
+  pre("of-email", VISITOR_EMAIL);
+  pre("of-date",  Q.get("date"));
+  pre("of-time",  Q.get("time"));
+  orderModal.hidden = false;
+  document.getElementById("of-name").focus();
+}
+function closeOrder() { orderModal.hidden = true; }
+document.getElementById("order-close").addEventListener("click", closeOrder);
+document.getElementById("order-backdrop").addEventListener("click", closeOrder);
+addEventListener("keydown", e => { if (e.key === "Escape" && !orderModal.hidden) closeOrder(); });
+
 document.querySelectorAll(".tier-cta").forEach(a => {
   const link = STRIPE_LINKS[a.dataset.tier];
   if (!link) return; // mailto fallback stays until links are pasted in
-  const u = new URL(link);
-  if (VISITOR_EMAIL) u.searchParams.set("prefilled_email", VISITOR_EMAIL);
-  if (VISITOR_REF) u.searchParams.set("client_reference_id", VISITOR_REF);
-  a.href = u.toString();
-  a.target = "_blank"; a.rel = "noopener";
+  if (VISITOR_REF) {
+    /* Path A — identity already travels with them */
+    a.href = stripeUrl(a.dataset.tier, VISITOR_EMAIL, VISITOR_REF);
+    a.target = "_blank"; a.rel = "noopener";
+  } else {
+    /* Path B — capture details first */
+    a.href = "#";
+    a.addEventListener("click", e => { e.preventDefault(); openOrder(a.dataset.tier); });
+  }
+});
+
+document.getElementById("order-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const status = document.getElementById("order-status");
+  const label  = document.getElementById("order-btn-label");
+  const email  = document.getElementById("of-email").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status.textContent = "That address doesn't look complete."; return; }
+  const orderRef = (crypto.randomUUID ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+  const row = {
+    order_ref:   orderRef,
+    tier:        ORDER_TIER,
+    price:       TIER_INFO[ORDER_TIER].price,
+    email:       email,
+    name:        document.getElementById("of-name").value.trim(),
+    birth_date:  document.getElementById("of-date").value || null,
+    birth_time:  document.getElementById("of-time").value || null,
+    birth_place: document.getElementById("of-place").value.trim() || null,
+    zip:         document.getElementById("of-zip").value.trim(),
+    source:      Q.get("utm_source") || "website",
+    status:      "pending_payment",
+    created_at:  new Date().toISOString()
+  };
+  label.textContent = "Aligning\u2026";
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/" + SUPABASE_ORDERS_TABLE, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(row)
+    });
+    if (!r.ok) throw new Error(r.status);
+    status.textContent = "Details saved — opening secure checkout\u2026";
+    location.href = stripeUrl(ORDER_TIER, email, orderRef);
+  } catch (err) {
+    label.textContent = "Continue to Checkout";
+    status.textContent = "The signal didn't get through — try again in a moment.";
+  }
 });
 
 /* boot the default chart so the story has a protagonist immediately */
