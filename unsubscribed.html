@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsubscribed — BeaconGaze</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%238b6cf0' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23ff8a3c'/%3E%3Ccircle cx='50' cy='18' r='3' fill='%234fc3ff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--void:#050310;--violet:#8b6cf0;--flare:#ff8a3c;--pulsar:#4fc3ff;
+  --silver:#e9e6f4;--silver-dim:rgba(233,230,244,.6);--glass-line:rgba(233,230,244,.12)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(120% 90% at 50% -10%,#0a0620 0%,var(--void) 60%) fixed;
+  color:var(--silver);font-family:'Space Grotesk',system-ui,sans-serif;font-weight:300;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem}
+main{max-width:520px}
+h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2.2rem,6vw,3.4rem);
+  line-height:1.15;margin-bottom:1rem}
+h1 .accent{font-style:italic;background:linear-gradient(110deg,var(--violet),var(--pulsar) 55%,var(--flare));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+p{color:var(--silver-dim);font-size:.95rem;line-height:1.7}
+a{display:inline-block;margin-top:2rem;padding:1rem 2.6rem;border-radius:100px;color:var(--pulsar);
+  border:1px solid rgba(79,195,255,.45);text-decoration:none;font-size:.72rem;letter-spacing:.3em;
+  text-transform:uppercase;transition:color .4s,border-color .4s,box-shadow .5s}
+a:hover{color:var(--silver);border-color:var(--pulsar);box-shadow:0 0 22px rgba(79,195,255,.25)}
+.sigil{width:64px;height:64px;margin:0 auto 2rem;display:block;opacity:.8}
+</style>
+</head>
+<body>
+<main>
+  <svg class="sigil" viewBox="0 0 64 64" aria-hidden="true">
+    <circle cx="32" cy="32" r="28" fill="none" stroke="#8b6cf0" stroke-width="2"/>
+    <circle cx="32" cy="32" r="6" fill="#ff8a3c"/><circle cx="50" cy="18" r="3" fill="#4fc3ff"/>
+  </svg>
+  <h1>You've left <span class="accent">the orbit.</span></h1>
+  <p>You're unsubscribed — no more forecasts, no more emails from us. It takes effect immediately.
+     If this was a mistake, you can rejoin anytime from the site. The sky isn't going anywhere.</p>
+  <a href="/">Return to BeaconGaze</a>
+</main>
+</body>
+</html>
