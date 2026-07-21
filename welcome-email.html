@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <!-- ============================================================
-  BEACONGAZE · WELCOME EMAIL (newsletter opt-in)
-  Paste this into the HTML body of your Make "Send an email"
-  module (Gmail or ESP). Content type: HTML.
-
-  MAPPING PLACEHOLDERS — replace before sending:
-    {{UNSUBSCRIBE_URL}}  → your unsubscribe link (required by CAN-SPAM)
-  Everything else is static. Table layout + inline styles only,
-  so it renders in Gmail, Outlook, and Apple Mail.
+  BEACONGAZE · WELCOME EMAIL (newsletter opt-in) — CORRECTED
+  Fixes vs previous version:
+    · Unsubscribe button now points at the real Make webhook,
+      passing the subscriber's email as ?email=
+    · Privacy Policy link points to /privacy.html
+  IN MAKE: replace {{SUBSCRIBER_EMAIL}} with the mapped value,
+  URL-encoded:  {{encodeURL(record.email)}}   (or 1.email etc.
+  depending on your trigger module's bundle structure)
 ============================================================ -->
 <html lang="en">
 <head>
@@ -77,14 +77,30 @@
     </td></tr>
 
     <!-- footer -->
-    <tr><td align="center" style="padding:30px 20px 0;">
+    <tr><td align="center" style="padding:40px 20px 0;">
+
+      <!-- Unsubscribe Button -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr><td align="center" style="border:1px solid #6f6a8a;border-radius:100px;">
+          <a href="https://hook.us2.make.com/cnngqibiwe8yqxbgicoqodo4kp4ehrrw?email={{SUBSCRIBER_EMAIL}}" target="_blank"
+             style="display:inline-block;padding:10px 30px;font-family:Arial,Helvetica,sans-serif;
+                    font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#b8b3cf;
+                    text-decoration:none;border-radius:100px;font-weight:bold;">
+            Unsubscribe
+          </a>
+        </td></tr>
+      </table>
+
+      <!-- spacer (padding on tables is unreliable in Outlook) -->
+      <div style="height:24px;line-height:24px;font-size:0;">&nbsp;</div>
+
+      <!-- Legal Text -->
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.8;letter-spacing:2px;text-transform:uppercase;color:#6f6a8a;">
         BeaconGaze · MMXXVI<br>
         For entertainment &amp; reflection · not professional advice<br>
-        <a href="https://beacongaze.com/privacy.html" style="color:#6f6a8a;text-decoration:underline;">Privacy</a>
-        &nbsp;·&nbsp;
-        <a href="https://hook.us2.make.com/cnngqibiwe8yqxbgicoqodo4kp4ehrrw{{SUBSCRIBER_EMAIL}}" style="color:#6f6a8a;text-decoration:underline;">Unsubscribe</a>
+        <a href="https://beacongaze.com/privacy.html" style="color:#6f6a8a;text-decoration:underline;">Privacy Policy</a>
       </div>
+
     </td></tr>
 
   </table>
