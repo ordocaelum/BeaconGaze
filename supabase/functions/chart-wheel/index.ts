@@ -10,9 +10,11 @@
 // SECURITY MODEL
 //   · Caller must present header  x-beacon-key: <FULFILLMENT_KEY>
 //     (set via: supabase secrets set FULFILLMENT_KEY=...)
-//   · SERVICE_ROLE key is read from env inside Supabase infra
-//     only — it is never in the repo, never in Make, never
-//     client-side.
+//   · The service key is read from env inside Supabase infra
+//     only (SERVICE_ROLE_MASTER secret, or the platform-injected
+//     legacy key) — never in the repo, never in Make, never
+//     client-side. Supports both sb_secret_... and legacy JWT
+//     key formats.
 //   · Every string that enters the generated document is
 //     HTML-escaped; every number is validated + clamped; arrays
 //     are length-capped. The JSON island is </script-safe.
@@ -22,9 +24,23 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 // ---------- env ----------
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Prefer the custom-named secret (new sb_secret_... key format);
+// fall back to the platform-injected legacy JWT service key.
+//   supabase secrets set SERVICE_ROLE_MASTER=sb_secret_...
+const SERVICE_KEY  = Deno.env.get("SERVICE_ROLE_MASTER")
+  ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FULFILL_KEY  = Deno.env.get("FULFILLMENT_KEY") ?? "";
 const BUCKET       = "chart-wheels";
+
+// New-format keys (sb_secret_...) are NOT JWTs — they must travel
+// in the `apikey` header. Only a real JWT (starts with "eyJ") may
+// also ride in the Authorization Bearer slot; putting a non-JWT
+// there makes Storage fail with "invalid Compact JWS".
+const AUTH_HEADERS: Record<string, string> = {
+  apikey: SERVICE_KEY,
+  ...(SERVICE_KEY.startsWith("eyJ")
+    ? { Authorization: `Bearer ${SERVICE_KEY}` } : {}),
+};
 
 // ---------- sanitization ----------
 const esc = (s: unknown): string =>
@@ -380,7 +396,7 @@ async function uploadHTML(path: string, html: string): Promise<void> {
     `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${SERVICE_KEY}`,
+        ...AUTH_HEADERS,
         "Content-Type": "text/html; charset=utf-8",
         "x-upsert": "true",
         "cache-control": "public, max-age=31536000, immutable",
@@ -395,8 +411,7 @@ async function updateOrder(orderRef: string, url: string): Promise<void> {
     `${SUPABASE_URL}/rest/v1/orders?order_ref=eq.${encodeURIComponent(orderRef)}`, {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${SERVICE_KEY}`,
-        apikey: SERVICE_KEY,
+        ...AUTH_HEADERS,
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       },
