@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Chart Wheel — BeaconGaze</title>
+<meta name="robots" content="noindex">
+<style>
+html,body{margin:0;width:100%;height:100%;background:#03010a;overflow:hidden}
+iframe{border:0;width:100%;height:100%;display:block}
+#msg{color:rgba(233,230,244,.6);font-family:'Space Grotesk',system-ui,sans-serif;
+  font-weight:300;display:flex;align-items:center;justify-content:center;
+  height:100%;letter-spacing:.2em;text-transform:uppercase;font-size:12px;
+  text-align:center;padding:0 2rem}
+</style>
+</head>
+<body>
+<div id="msg">Aligning your sky&hellip;</div>
+<script>
+(function () {
+  var STORAGE_BASE =
+    "https://ekjodzzcrrgatzudbvvr.supabase.co/storage/v1/object/public/chart-wheels/";
+  var f = new URLSearchParams(location.search).get("f") || "";
+  // strict allow-list: our generated filenames only — blocks any
+  // attempt to point this viewer at arbitrary URLs or paths
+  if (!/^wheel_[a-zA-Z0-9_-]+\.html$/.test(f)) {
+    document.getElementById("msg").textContent =
+      "This chart link looks incomplete — use the button in your delivery email.";
+    return;
+  }
+  fetch(STORAGE_BASE + f)
+    .then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    })
+    .then(function (html) {
+      var frame = document.createElement("iframe");
+      // sandboxed: scripts run (the wheel needs them) but the frame
+      // has no same-origin access, no top-navigation, no forms
+      frame.setAttribute("sandbox", "allow-scripts");
+      frame.setAttribute("title", "Interactive natal chart wheel");
+      frame.srcdoc = html;
+      document.body.replaceChild(frame, document.getElementById("msg"));
+    })
+    .catch(function () {
+      document.getElementById("msg").textContent =
+        "We couldn't reach your chart just now — refresh in a moment, or reply to your delivery email.";
+    });
+})();
+</script>
+</body>
+</html>
