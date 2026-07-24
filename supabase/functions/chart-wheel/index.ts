@@ -434,9 +434,13 @@ serve(async (req: Request): Promise<Response> => {
     const html = buildHTML(payload);
     const file = `wheel_${payload.order_id.replace(/[^a-zA-Z0-9_-]/g, "")}_${Date.now()}.html`;
     await uploadHTML(file, html);
-    const cdnUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${file}`;
-    await updateOrder(payload.order_id, cdnUrl);
-    return json({ status: "success", url: cdnUrl });
+    // Raw storage URL serves as plain text by Supabase policy (HTML
+    // is never rendered from supabase.co). Customers get the branded
+    // viewer on our own domain, which fetches + renders the file.
+    const rawUrl    = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${file}`;
+    const viewerUrl = `https://beacongaze.com/wheel.html?f=${file}`;
+    await updateOrder(payload.order_id, viewerUrl);
+    return json({ status: "success", url: viewerUrl, raw: rawUrl });
   } catch (err) {
     return json({ status: "error", message: String(err?.message ?? err) }, 400);
   }
