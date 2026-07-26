@@ -253,7 +253,7 @@ section{position:relative;z-index:2}
 #destiny{flex-direction:column;justify-content:center;text-align:center;min-height:110vh}
 #destiny .display{font-size:clamp(3rem,9vw,7.4rem)}
 .destiny-ctas{display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;margin-top:3.4rem}
-.tier-band{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:1100px;margin:3.4rem auto 0;text-align:left}
+.tier-band{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem;max-width:820px;margin:3.4rem auto 0;text-align:left}/* premium off: 2 cols — restore repeat(3,1fr)+1100px when it returns */
 @media(max-width:900px){.tier-band{grid-template-columns:1fr;max-width:480px}}
 .tier{padding:2.4rem 2rem;display:flex;flex-direction:column;gap:1rem;position:relative}
 .tier h3{font-size:1.6rem}
@@ -615,7 +615,9 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
         <p><b>All-Inclusive:</b> Contains absolutely everything included in the Basic Reading tier.</p>
         <a class="cta-reserve tier-cta" data-tier="full" href="mailto:hello@beacongaze.com?subject=Full%20Report%20—%20%2424.99"><span>Get Full Report</span></a>
       </div>
-      <!-- Premium Blueprint -->    
+      <!-- PREMIUM BLUEPRINT — DISABLED FOR LAUNCH.
+           To restore: remove this comment block AND switch .tier-band
+           back to repeat(3,1fr) in the CSS.
       <div class="tier glass">
         <h3>Premium Blueprint</h3>
         <b>$49.99</b>
@@ -626,6 +628,7 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
         <p><b>The Ultimate Blueprint:</b> Contains absolutely everything from both the Basic and Full tiers combined.</p>
         <a class="cta-kit tier-cta" data-tier="premium" href="mailto:hello@beacongaze.com?subject=Premium%20Blueprint%20—%20%2449.99">Get Premium</a>
       </div>
+      END PREMIUM DISABLED -->
     </div>
     <div style="text-align:center;margin-top:3rem">
       <p class="lede" style="margin-inline:auto;font-size:.85rem">
