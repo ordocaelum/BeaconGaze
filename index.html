@@ -667,6 +667,8 @@ footer{position:relative;z-index:2;padding:3rem clamp(1.4rem,6vw,6rem);display:f
         <input id="of-date" type="date" required></div>
       <div><label for="of-time">Birth time <span style="opacity:.6">(if known)</span></label>
         <input id="of-time" type="time"></div>
+      <div><label for="of-tz">Birth timezone</label>
+        <select id="of-tz"></select></div>
       <div><label for="of-place">Birth city &amp; state</label>
         <input id="of-place" type="text" maxlength="80" placeholder="Salt Lake City, UT"></div>
       <div><label for="of-zip">Current ZIP / postal code</label>
@@ -1569,6 +1571,9 @@ function openOrder(tier) {
   pre("of-email", VISITOR_EMAIL);
   pre("of-date",  Q.get("date"));
   pre("of-time",  Q.get("time"));
+  if (Q.get("tz")) { const s = document.getElementById("of-tz");
+    if ([...s.options].some(o => o.value === String(parseFloat(Q.get("tz")))))
+      s.value = String(parseFloat(Q.get("tz"))); }
   orderModal.hidden = false;
   document.getElementById("of-name").focus();
 }
@@ -1591,6 +1596,48 @@ document.querySelectorAll(".tier-cta").forEach(a => {
   }
 });
 
+/* order-modal timezone options (same range as the instrument's) */
+(function () {
+  const sel = document.getElementById("of-tz");
+  const guess = Math.round((-(new Date().getTimezoneOffset()) / 60) * 2) / 2;
+  for (let t = -12; t <= 14; t += 0.5) {
+    const o = document.createElement("option");
+    o.value = t; o.textContent = "UTC" + (t >= 0 ? "+" : "") + t;
+    if (t === guess) o.selected = true;
+    sel.appendChild(o);
+  }
+})();
+/* Compute real planetary longitudes for this birth moment using the
+   site's own astronomy engine. Houses/ascendant need birth lat+lon
+   (not asked in the modal), so houses are omitted and the wheel
+   renders gracefully without them. Speed sampled across one day
+   gives a truthful Direct/Retrograde reading. */
+function computeOrderPlanets(dateStr, timeStr, tz) {
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [h, mi] = (timeStr || "12:00").split(":").map(Number);
+  const jd  = julianDay(y, mo, d, (h + mi / 60) - tz);
+  const SIGN_NAMES = ["Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+  const defs = [
+    ["sun", "Sun",         j => sunLongitude(j)],
+    ["moon", "Moon",       j => moonLongitude(j)],
+    ["mercury", "Mercury", j => planetLongitude("Mercury", j)],
+    ["venus", "Venus",     j => planetLongitude("Venus", j)],
+    ["mars", "Mars",       j => planetLongitude("Mars", j)],
+    ["jupiter", "Jupiter", j => planetLongitude("Jupiter", j)],
+    ["saturn", "Saturn",   j => planetLongitude("Saturn", j)]
+  ];
+  return defs.map(([id, name, fn]) => {
+    const lon = fn(jd);
+    let daily = fn(jd + 1) - lon;             // degrees per day
+    if (daily > 180) daily -= 360; if (daily < -180) daily += 360;
+    return { id, name,
+      degree: +lon.toFixed(2),
+      sign:   SIGN_NAMES[Math.floor(lon / 30) % 12],
+      house:  0,
+      speed:  +daily.toFixed(3) };
+  });
+}
 document.getElementById("order-form").addEventListener("submit", async e => {
   e.preventDefault();
   const status = document.getElementById("order-status");
@@ -1611,7 +1658,14 @@ document.getElementById("order-form").addEventListener("submit", async e => {
     zip:         document.getElementById("of-zip").value.trim(),
     source:      Q.get("utm_source") || "website",
     status:      "pending_payment",
-    created_at:  new Date().toISOString()
+    created_at:  new Date().toISOString(),
+    /* the customer's actual sky, computed here at checkout, stored
+       as a JSON string — Make passes it verbatim to the chart-wheel
+       function as the "planets" array */
+    planet_data: JSON.stringify(computeOrderPlanets(
+      document.getElementById("of-date").value,
+      document.getElementById("of-time").value,
+      parseFloat(document.getElementById("of-tz").value) || 0))
   };
   label.textContent = "Aligning\u2026";
   try {
